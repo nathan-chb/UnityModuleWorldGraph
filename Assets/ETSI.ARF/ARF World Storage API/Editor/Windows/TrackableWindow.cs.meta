@@ -3,7 +3,10 @@ guid: 229d5ea484d30f945b9318581fb4f2da
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - m_ViewDataDictionary: {instanceID: 0}
+  - worldStorageServer: {fileID: 11400000, guid: 4f997253243de534dad12937f1284975, type: 2}
+  - worldStorageUser: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

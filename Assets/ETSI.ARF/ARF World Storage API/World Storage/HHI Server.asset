@@ -16,4 +16,4 @@ MonoBehaviour:
   company: Fraunhofer HHI
   basePath: https://ics1.hhi.fraunhofer.de
   port: 8080
-  currentUser: {fileID: 11400000, guid: ce0f40be06008b14283766424922b729, type: 2}
+  currentUser: {fileID: 11400000, guid: 748585a50399fd64883147cd731ae0b7, type: 2}

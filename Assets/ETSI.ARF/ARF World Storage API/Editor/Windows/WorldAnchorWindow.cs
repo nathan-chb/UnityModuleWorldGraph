@@ -25,7 +25,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using TMPro;
 using ETSI.ARF.WorldStorage.REST;
+using System;
 
 #if USING_OPENAPI_GENERATOR
 using Org.OpenAPITools.Api;
@@ -56,16 +58,24 @@ namespace ETSI.ARF.WorldStorage.UI
         Vector3 worldAnchorSize;
         Vector3 localCRS_pos;
         Vector3 localCRS_rot;
+
         [SerializeField] Dictionary<string, List<string>> keyValueTags = new Dictionary<string, List<string>>();
+        string key1 = "";
+        string value1 = "";
 
         // UI stuffs
         private Vector2 scrollPos;
         private Color ori;
         private GUIStyle gsTest;
 
+        //graph params to generate the node
+        public bool useCoord;
+        public float nodePosX = 0;
+        public float nodePosY = 0;
+
         public static void ShowWindow(WorldStorageServer ws, WorldStorageUser user, string UUID = "")
         {
-            winSingleton = EditorWindow.GetWindow(typeof(WorldAnchorWindow), false, WorldStorageWindow.winName) as WorldAnchorWindow;
+            winSingleton = EditorWindow.GetWindow(typeof(WorldAnchorWindow), false, "ETSI ARF - World Anchor") as WorldAnchorWindow;
             winSingleton.worldStorageServer = ws;
             winSingleton.worldStorageUser = user;
             if (!string.IsNullOrEmpty(UUID))
@@ -73,6 +83,32 @@ namespace ETSI.ARF.WorldStorage.UI
                 winSingleton.UUID = UUID;
                 winSingleton.GetWorldAnchorParams();
             }
+            else
+            {
+                // Create new one
+                winSingleton.AddAnchor();
+            }
+        }
+
+        public static GameObject GenerateAndUpdateVisual(string UUID, string name, Vector3 pos, Vector3 rot)
+        {
+            ETSI.ARF.WorldStorage.UI.Prefabs.WorldStoragePrefabs prefabs;
+            prefabs = (Prefabs.WorldStoragePrefabs)Resources.Load("ARFPrefabs");
+            GameObject arf = GameObject.Find("ARF Visuals");
+            GameObject visual = GameObject.Find(UUID);
+
+            if (arf == null) arf = new GameObject("ARF Visuals");
+            if (visual == null)
+            {
+                visual = SceneAsset.Instantiate<GameObject>(prefabs.worldAnchorPrefab, pos, Quaternion.Euler(rot), arf.transform); // TODO rot
+                visual.name = UUID;
+            }
+            else
+            {
+                visual.transform.SetPositionAndRotation(pos, Quaternion.Euler(rot));
+            }
+            visual.transform.Find("Canvas/Text").GetComponent<TextMeshProUGUI>().text = $"Name: { name }\nUUID: { UUID }";
+            return visual;
         }
 
         public WorldAnchorWindow()
@@ -85,8 +121,10 @@ namespace ETSI.ARF.WorldStorage.UI
             ori = GUI.backgroundColor; // remember ori color
 
             gsTest = new GUIStyle("window");
-            gsTest.normal.textColor = WorldStorageWindow.arfColors[0];
+            //gsTest.normal.textColor = WorldStorageWindow.arfColors[0];
             gsTest.fontStyle = FontStyle.Bold;
+            gsTest.alignment = TextAnchor.UpperLeft;
+            gsTest.fontSize = 16;
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandWidth(true));
             WorldStorageWindow.DrawCopyright();
@@ -103,103 +141,99 @@ namespace ETSI.ARF.WorldStorage.UI
 
         void DrawAnchorStuffs()
         {
-            GUILayout.BeginVertical("World Anchor Editor", gsTest);
+            GUILayout.BeginVertical(); // "World Anchor Editor", gsTest);
+            EditorGUILayout.Space();
+
+            GUILayout.BeginHorizontal();
+            GUI.backgroundColor = WorldStorageWindow.arfColors[8];
+            Texture anchorImage = (Texture)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Images/anchor.png", typeof(Texture));
+            GUILayout.Box(anchorImage, GUILayout.Width(24), GUILayout.Height(24));
+            GUI.backgroundColor = ori;
+            GUILayout.Label("World Anchor Parameters:", EditorStyles.whiteBoldLabel);
+            GUILayout.EndHorizontal();
+
+            Rect rect = EditorGUILayout.GetControlRect(false, WorldStorageWindow.lineH);
+            EditorGUI.DrawRect(rect, WorldStorageWindow.arfColors[8]);
+
             //
             GUILayout.Label("Server: " + worldStorageServer.serverName, EditorStyles.whiteLargeLabel);
             GUILayout.Label("User: " + worldStorageUser.userName, EditorStyles.whiteLargeLabel);
             EditorGUILayout.Space();
 
-            //GUILayout.BeginHorizontal();
-            customName = EditorGUILayout.TextField("Name of Anchor", customName);
+            customName = EditorGUILayout.TextField("Name of Anchor:", customName);
 #if isDEBUG
             GUILayout.Label("UUID: " + UUID, EditorStyles.miniLabel); // readonly
             GUILayout.Label("Creator UID: " + creatorUUID, EditorStyles.miniLabel); // readonly
 #endif
             EditorGUILayout.Space();
 
-            GUI.backgroundColor = WorldStorageWindow.arfColors[1];
-            if (GUILayout.Button("Read Parameters"))
-            {
-                UUID = WorldStorageWindow.GetUUIDFromString(customName);
-                if (UUID == null) UUID = customName; // try this
-                GetWorldAnchorParams();
-            }
-            GUI.backgroundColor = ori;
-
-            unit = (UnitSystem)EditorGUILayout.EnumPopup("Unit System:", unit);
-
-            EditorGUILayout.Space(10);
-            worldAnchorSize = EditorGUILayout.Vector3Field("Trackable Size:", worldAnchorSize);
-
-            EditorGUILayout.Space(10);
-            GUILayout.Label("Local CRS:");
-            localCRS_pos = EditorGUILayout.Vector3Field("Position:", localCRS_pos);
-            localCRS_rot = EditorGUILayout.Vector3Field("Rotation:", localCRS_rot);
-
-            EditorGUILayout.Space();
-            groupEnabled = EditorGUILayout.BeginToggleGroup("Optional Parameters:", groupEnabled);
-            //EditorGUILayout.IntField("Number of KeyValues", 0);
-            //EditorGUILayout.Space();
-            //EditorGUILayout.TextField("Key", "");
-            //EditorGUILayout.TextField("Value", "");
-            if (GUILayout.Button("Generate Dummy Key Values"))
-            {
-                // dummy
-                keyValueTags.Clear();
-                keyValueTags.Add("Location", new List<string> { "Room1" });
-            }
-            EditorGUILayout.EndToggleGroup();
-            //
-            GUILayout.EndVertical();
-
-            // ###########################################################
-            GUI.backgroundColor = WorldStorageWindow.arfColors[1];
-            if (GUILayout.Button("Create New World Anchor"))
-            {
-                Debug.Log("POST World Anchor");
-
-                UUID = "0";
-                if (string.IsNullOrEmpty(UUID) || UUID == "0") UUID = System.Guid.Empty.ToString();
-                WorldAnchor obj = GenerateWorldAnchor();
-                UUID = WorldAnchorRequest.AddWorldAnchor(worldStorageServer, obj);
-                WorldStorageWindow.WorldStorageWindowSingleton.GetWorldAnchors();
-                WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
-            }
-
+            // ---------------------
+            // Toolbar
+            // ---------------------
+            EditorGUILayout.BeginHorizontal();
             GUI.backgroundColor = WorldStorageWindow.arfColors[2];
-            if (GUILayout.Button("Modify World Anchor"))
+            if (GUILayout.Button("Save"))
             {
                 Debug.Log("PUT World Anchor");
 
-                if (!string.IsNullOrEmpty(UUID) && UUID != "0")
+                if (!string.IsNullOrEmpty(UUID) && UUID != "0" && UUID != System.Guid.Empty.ToString())
                 {
                     WorldAnchor obj = GenerateWorldAnchor();
                     UUID = WorldAnchorRequest.UpdateWorldAnchor(worldStorageServer, obj);
+                    UUID = UUID.Trim('"'); //Bugfix: remove " from server return value
                     WorldStorageWindow.WorldStorageWindowSingleton.GetWorldAnchors();
                     WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
                 }
+                Close();
             }
 
-            // ###########################################################
             GUI.backgroundColor = WorldStorageWindow.arfColors[3];
-            if (GUILayout.Button("Delete World Anchor"))
+            if (GUILayout.Button("Delete"))
             {
                 Debug.Log("Delete World Anchor");
                 WorldAnchorRequest.DeleteWorldAnchor(worldStorageServer, UUID);
                 UUID = System.Guid.Empty.ToString();
+                customName = "Warning: Object deleted !";
                 creatorUUID = System.Guid.Empty.ToString();
                 unit = UnitSystem.CM;
-                WorldStorageWindow.WorldStorageWindowSingleton.GetWorldAnchors();
-                WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
+                if (WorldStorageWindow.WorldStorageWindowSingleton != null)
+                {
+                    WorldStorageWindow.WorldStorageWindowSingleton.GetWorldAnchors();
+                    WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
+                }
+                Close();
             }
             GUI.backgroundColor = ori;
 
-            // ###########################################################
             GUI.backgroundColor = WorldStorageWindow.arfColors[5];
-            if (GUILayout.Button("Generate GameObject Component"))
+            if (GUILayout.Button("Generate/Update GameObject"))
             {
+                GenerateAndUpdateVisual(UUID, customName, localCRS_pos, localCRS_rot);
             }
             GUI.backgroundColor = ori;
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space();
+
+            // ---------------------
+            // Params
+            // ---------------------
+            unit = (UnitSystem)EditorGUILayout.EnumPopup("Unit System:", unit);
+
+            EditorGUILayout.Space();
+            worldAnchorSize = EditorGUILayout.Vector3Field("Trackable Size:", worldAnchorSize);
+
+            EditorGUILayout.Space();
+            GUILayout.Label("Local CRS:");
+            localCRS_pos = EditorGUILayout.Vector3Field("   Position:", localCRS_pos);
+            localCRS_rot = EditorGUILayout.Vector3Field("   Rotation:", localCRS_rot);
+
+            EditorGUILayout.Space();
+            groupEnabled = EditorGUILayout.BeginToggleGroup("Optional Parameters:", groupEnabled);
+            key1 = EditorGUILayout.TextField("Key 1", key1);
+            value1 = EditorGUILayout.TextField("Value 1", value1);
+            EditorGUILayout.EndToggleGroup();
+            //
+            GUILayout.EndVertical();
         }
 
         private void GetWorldAnchorParams()
@@ -213,13 +247,10 @@ namespace ETSI.ARF.WorldStorage.UI
                 worldAnchorSize = new Vector3((float)obj.WorldAnchorSize[0], (float)obj.WorldAnchorSize[1], (float)obj.WorldAnchorSize[2]);
             }
             else worldAnchorSize = Vector3.zero;
+
             if (obj.LocalCRS.Count == 16)
             {
-                Matrix4x4 localCRS = new Matrix4x4();
-                localCRS.m00 = obj.LocalCRS[0]; localCRS.m01 = obj.LocalCRS[1]; localCRS.m02 = obj.LocalCRS[2]; localCRS.m03 = obj.LocalCRS[3];
-                localCRS.m10 = obj.LocalCRS[4]; localCRS.m11 = obj.LocalCRS[5]; localCRS.m12 = obj.LocalCRS[6]; localCRS.m13 = obj.LocalCRS[7];
-                localCRS.m20 = obj.LocalCRS[8]; localCRS.m21 = obj.LocalCRS[9]; localCRS.m22 = obj.LocalCRS[10]; localCRS.m23 = obj.LocalCRS[11];
-                localCRS.m30 = obj.LocalCRS[12]; localCRS.m31 = obj.LocalCRS[13]; localCRS.m32 = obj.LocalCRS[14]; localCRS.m33 = obj.LocalCRS[15];
+                Matrix4x4 localCRS = WorldStorageWindow.MatrixFromLocalCRS(obj.LocalCRS);
                 localCRS_pos = localCRS.GetPosition();
                 localCRS_rot = localCRS.rotation.eulerAngles;
             }
@@ -228,8 +259,26 @@ namespace ETSI.ARF.WorldStorage.UI
                 localCRS_pos = Vector3.zero;
                 localCRS_rot = Vector3.zero;
             }
-            keyValueTags = obj.KeyvalueTags;
-            this.Repaint(); // TODO
+
+            // Read a key value (demo)
+            var first = WorldStorageWindow.GetFirstKeyValueTags(obj.KeyvalueTags);
+            key1 = first.Item1;
+            value1 = first.Item2;
+
+            this.Repaint();
+        }
+
+        public void AddAnchor()
+        {
+            Debug.Log("POST World Anchor");
+            UUID = System.Guid.Empty.ToString();
+            customName = "Default Anchor";
+
+            WorldAnchor obj = GenerateWorldAnchor();
+            UUID = WorldAnchorRequest.AddWorldAnchor(worldStorageServer, obj);
+            UUID = UUID.Trim('"'); //Bugfix: remove " from server return value
+            WorldStorageWindow.WorldStorageWindowSingleton.GetWorldAnchors();
+            WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
         }
 
         public WorldAnchor GenerateWorldAnchor()
@@ -240,8 +289,8 @@ namespace ETSI.ARF.WorldStorage.UI
     List<double?> trackableDimension = new List<double?>();
 #endif
             _worldAnchorSize.Add(worldAnchorSize.x);
-            _worldAnchorSize.Add(worldAnchorSize.x);
             _worldAnchorSize.Add(worldAnchorSize.y);
+            _worldAnchorSize.Add(worldAnchorSize.z);
             Debug.Log("Created dimension");
 
             Matrix4x4 localCRS = new Matrix4x4();
@@ -254,9 +303,21 @@ namespace ETSI.ARF.WorldStorage.UI
                 localCRS.m30,    localCRS.m31,    localCRS.m32,    localCRS.m33,
             };
 
+            // Create a key value (one from demo)
+            keyValueTags.Clear();
+            keyValueTags.Add(key1, new List<string> { value1 });
+
             System.Guid _uuid = System.Guid.Parse(UUID);
             System.Guid _creator = System.Guid.Parse(worldStorageUser.UUID);
             WorldAnchor t = new WorldAnchor(_uuid, customName, _creator, _localCRS, unit, _worldAnchorSize, keyValueTags);
+
+            var posX = new List<String>();
+            posX.Add(nodePosX.ToString());
+            t.KeyvalueTags["unityAuthoringPosX"] = posX;
+            var posY = new List<String>();
+            posY.Add(nodePosY.ToString());
+            t.KeyvalueTags["unityAuthoringPosY"] = posY;
+
             return t;
         }
     }

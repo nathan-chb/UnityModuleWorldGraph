@@ -64,16 +64,23 @@ namespace ETSI.ARF.WorldStorage.UI
         private bool showListT = true;
         private bool showListA = true;
         private bool showListL = true;
+        
+        private string filterByKeyValueTag = "";
 
         static public string winName = "ARF Authoring Editor";
+        static public int lineH = 5;
         static public Color[] arfColors = new Color[]
         {
             Color.yellow,                   // paneltext
             new Color(0.3f, 1f, 1f),        // button REST
-            new Color(1f, 1f, 0.3f),        // button create + window
+            new Color(0.3f, 1f, 0.3f),      // button create
             new Color(1f, 0f, 0f),          // button delete (red)
-            new Color(1f, 0f, 1f),           // button graph
-            new Color(.7f, .5f, 1f)           // button prefab
+            new Color(.7f, .5f, 1f),          // button graph window
+            new Color(.3f, .7f, 1f),        // button generate prefab
+            new Color(1f, 1f, 0.3f),        // button request
+            new Color(1f, 0.3f, 0.3f),        // color for trackables
+            new Color(1f, 0.7f, 0f),        // color for anchors
+            new Color(.66f, .4f, 1f)         // color for links
         };
 
 
@@ -92,21 +99,26 @@ namespace ETSI.ARF.WorldStorage.UI
         {
             // Title 
             GUILayout.Label("Augmented Reality Framework", EditorStyles.boldLabel);
-            GUILayout.Label("Copyright(c) 2022, ETSI (BSD 3-Clause License)");
+            GUILayout.Label("Copyright (C) 2022, ETSI (BSD 3-Clause License)");
         }
 
         void OnGUI()
         {
             ori = GUI.backgroundColor;
             gsTest = new GUIStyle("window");
+            //gsTest.normal.textColor = WorldStorageWindow.arfColors[0];
             gsTest.fontStyle = FontStyle.Bold;
-            gsTest.normal.textColor = WorldStorageWindow.arfColors[0];
+            gsTest.alignment = TextAnchor.UpperLeft;
+            gsTest.fontSize = 16;
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandWidth(true));
             WorldStorageWindow.DrawCopyright();
 
             // Server info
             GUILayout.BeginVertical("World Storage Server", gsTest);
+            EditorGUILayout.Space();
+            Rect rect = EditorGUILayout.GetControlRect(false, 1); // WorldStorageWindow.lineH);
+            EditorGUI.DrawRect(rect, Color.black);
             //
             GUILayout gl = new GUILayout();
 
@@ -121,7 +133,6 @@ namespace ETSI.ARF.WorldStorage.UI
             GUI.backgroundColor = WorldStorageWindow.arfColors[4];
             if (GUILayout.Button("Open World Representation Graph Window..."))
             {
-                GraphWindow.ShowWindow();
             }
             GUI.backgroundColor = ori;
 
@@ -178,16 +189,24 @@ namespace ETSI.ARF.WorldStorage.UI
             GUILayout.EndHorizontal();
             #endregion
 
+            EditorGUILayout.Space();
+
             ScriptableObject target = this;
             SerializedObject so = new SerializedObject(target);
+
+            GUI.backgroundColor = WorldStorageWindow.arfColors[4];
+            if (GUILayout.Button("Open World Graph Window..."))
+            {
+            }
+            GUI.backgroundColor = ori;
 
             // ###########################################################
             // Get creators
             // ###########################################################
             #region Get all creator UUID
-            EditorGUILayout.Space(10);
-            GUI.backgroundColor = WorldStorageWindow.arfColors[1];
-            if (GUILayout.Button("Request all Creator ID")) GetCreators();
+            EditorGUILayout.Space();
+            GUI.backgroundColor = WorldStorageWindow.arfColors[0];
+            if (GUILayout.Button("Request UUID of Creators")) GetCreators();
             GUI.backgroundColor = ori;
 
             SerializedProperty stringsProperty = so.FindProperty("creators");
@@ -195,74 +214,102 @@ namespace ETSI.ARF.WorldStorage.UI
             so.ApplyModifiedProperties(); // Remember to apply modified properties
             #endregion
 
+            //EditorGUILayout.Space();
+            //GUILayout.Label("World Storage Elements:", EditorStyles.whiteLargeLabel);
+
+
+            // ###########################################################
+            // Filter (Key = Group)
+            // ###########################################################
+            #region Filter
+            EditorGUILayout.Space();
+            filterByKeyValueTag = EditorGUILayout.TextField("Filter for KeyValue Group:", filterByKeyValueTag);
+            #endregion
+
             // ###########################################################
             // Handle trackables
             // ###########################################################
             #region Get all trackable objects
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space();
 
-            GUI.backgroundColor = WorldStorageWindow.arfColors[1];
+            GUILayout.BeginHorizontal();
+            GUI.backgroundColor = WorldStorageWindow.arfColors[7];
+            Texture trackableImage = (Texture)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Images/trackable.png", typeof(Texture));
+            GUILayout.Box(trackableImage, GUILayout.Width(24), GUILayout.Height(24));
+            GUI.backgroundColor = ori;
+            GUILayout.Label("Trackables:", EditorStyles.whiteBoldLabel);
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            GUI.backgroundColor = WorldStorageWindow.arfColors[0];
             if (GUILayout.Button("Request Trackables"))
             {
                 GetTrackables();
             }
 
             GUI.backgroundColor = WorldStorageWindow.arfColors[2];
-            if (GUILayout.Button("Create/Edit Trackable..."))
+            if (GUILayout.Button("Create New"))
             {
-                Debug.Log("Open Trackable Window");
+                Debug.Log("Create trackable and open window");
                 TrackableWindow.ShowWindow(worldStorageServer, worldStorageUser);
             }
 
-            GUI.backgroundColor = WorldStorageWindow.arfColors[3];
+            GUI.backgroundColor = ori;
+            //GUI.backgroundColor = WorldStorageWindow.arfColors[3];
             if (GUILayout.Button("Delete all Trackables (3 stay in!!!)"))
             {
-                Debug.Log("Deleting all Trackable ");
-                int n = 0;
-                string UUID;
-                foreach (var customName in trackables)
+                if (EditorUtility.DisplayDialog("Deleting elements", "Do you really want to delete all trackables?", "Yes", "No"))
                 {
-                    if (!customName.Contains("[")) UUID = customName;
-                    else
+                    Debug.Log("Deleting all Trackable ");
+                    int n = 0;
+                    string UUID;
+                    foreach (var customName in trackables)
                     {
-                        // extract the UUID
-                        UUID = customName.Split('[', ']')[1];
+                        if (!customName.Contains("[")) UUID = customName;
+                        else
+                        {
+                            // extract the UUID
+                            UUID = customName.Split('[', ']')[1];
+                        }
+                        if (++n > 3) TrackableRequest.DeleteTrackable(worldStorageServer, UUID);
                     }
-                    if (++n > 3) TrackableRequest.DeleteTrackable(worldStorageServer, UUID);
-                }
 
-                GetTrackables();
-                WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
+                    GetTrackables();
+                    WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
+                }
             }
             GUI.backgroundColor = ori;
-           
+            EditorGUILayout.EndHorizontal();
+
             // Show list
             stringsProperty = so.FindProperty("trackables");
-            //EditorGUILayout.PropertyField(stringsProperty, /*new GUIContent("Trackbales"),*/ true); // True means show children
-            //so.ApplyModifiedProperties(); // Remember to apply modified properties
-
-            // New version with "Edit" button:
             showListT = EditorGUILayout.BeginFoldoutHeaderGroup(showListT, "List of Trackables");
             if (showListT)
                 for (int i = 0; i < stringsProperty.arraySize; i++)
                 {
                     EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.PropertyField(stringsProperty.GetArrayElementAtIndex(i));
-                    //EditorGUILayout.PropertyField(list.GetArrayElementAtIndex(i), GUIContent.none);
 
                     string UUID = WorldStorageWindow.GetUUIDFromString(stringsProperty.GetArrayElementAtIndex(i).stringValue);
                     if (UUID == null) UUID = trackables[i]; // try this
-                    if (GUILayout.Button("-", EditorStyles.miniButtonLeft, miniButtonWidth))
-                    {
-                        TrackableRequest.DeleteTrackable(worldStorageServer, UUID);
-                        WorldStorageWindowSingleton.GetTrackables();
-                        WorldStorageWindowSingleton.Repaint();
-                    }
                     if (GUILayout.Button("Edit...", EditorStyles.miniButtonLeft, buttonWidth))
                     {
                         Debug.Log("Open Trackable Window");
                         TrackableWindow.ShowWindow(worldStorageServer, worldStorageUser, UUID);
                     }
+
+                    GUI.backgroundColor = WorldStorageWindow.arfColors[3];
+                    if (GUILayout.Button("X", EditorStyles.miniButtonLeft, miniButtonWidth))
+                    {
+                        if (EditorUtility.DisplayDialog("Delete", "Are you sure you want to delete this element?", "Delete", "Cancel"))
+                        {
+                            TrackableRequest.DeleteTrackable(worldStorageServer, UUID);
+                            WorldStorageWindowSingleton.GetTrackables();
+                            WorldStorageWindowSingleton.Repaint();
+                        }
+                    }
+                    GUI.backgroundColor = ori;
+
                     EditorGUILayout.EndHorizontal();
                 }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -272,70 +319,86 @@ namespace ETSI.ARF.WorldStorage.UI
             // Handle anchors
             // ###########################################################
             #region Get all anchor objects
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space();
 
-            GUI.backgroundColor = WorldStorageWindow.arfColors[1];
-            if (GUILayout.Button("Request World Anchors"))
+            GUILayout.BeginHorizontal();
+            GUI.backgroundColor = WorldStorageWindow.arfColors[8];
+            Texture anchorImage = (Texture)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Images/anchor.png", typeof(Texture));
+            GUILayout.Box(anchorImage, GUILayout.Width(24), GUILayout.Height(24));
+            GUI.backgroundColor = ori;
+            GUILayout.Label("World Anchors:", EditorStyles.whiteBoldLabel);
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            GUI.backgroundColor = WorldStorageWindow.arfColors[0];
+            if (GUILayout.Button("Request Anchors"))
             {
                 GetWorldAnchors();
             }
 
             GUI.backgroundColor = WorldStorageWindow.arfColors[2];
-            if (GUILayout.Button("Create/Edit World Anchor..."))
+            if (GUILayout.Button("Create New"))
             {
-                Debug.Log("Open World Anchor Window");
+                Debug.Log("Create anchor and open window");
                 WorldAnchorWindow.ShowWindow(worldStorageServer, worldStorageUser);
             }
 
-            GUI.backgroundColor = WorldStorageWindow.arfColors[3];
-            if (GUILayout.Button("Delete all World Anchors (3 stay in!!!)"))
+            GUI.backgroundColor = ori;
+            //GUI.backgroundColor = WorldStorageWindow.arfColors[3];
+            if (GUILayout.Button("Delete all Anchors (3 stay in!!!)"))
             {
-                Debug.Log("Deleting all World Anchors ");
-                int n = 0;
-                string UUID;
-                foreach (var customName in anchors)
+                if (EditorUtility.DisplayDialog("Deleting elements", "Do you really want to delete all anchors?", "Yes", "No"))
                 {
-                    if (!customName.Contains("[")) UUID = customName;
-                    else
+                    Debug.Log("Deleting all World Anchors ");
+                    int n = 0;
+                    string UUID;
+                    foreach (var customName in anchors)
                     {
-                        // extract the UUID
-                        UUID = customName.Split('[', ']')[1];
+                        if (!customName.Contains("[")) UUID = customName;
+                        else
+                        {
+                            // extract the UUID
+                            UUID = customName.Split('[', ']')[1];
+                        }
+                        if (++n > 3) WorldAnchorRequest.DeleteWorldAnchor(worldStorageServer, UUID);
                     }
-                    if (++n > 3) WorldAnchorRequest.DeleteWorldAnchor(worldStorageServer, UUID);
-                }
 
-                GetWorldAnchors();
-                WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
+                    GetWorldAnchors();
+                    WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
+                }
             }
             GUI.backgroundColor = ori;
+            EditorGUILayout.EndHorizontal();
 
             // Show list
             stringsProperty = so.FindProperty("anchors");
-            //EditorGUILayout.PropertyField(stringsProperty, /*new GUIContent("Trackbales"),*/ true); // True means show children
-            //so.ApplyModifiedProperties(); // Remember to apply modified properties
-
-            // New version with "Edit" button:
             showListA = EditorGUILayout.BeginFoldoutHeaderGroup(showListA, "List of World Anchors");
             if (showListA)
                 for (int i = 0; i < stringsProperty.arraySize; i++)
                 {
                     EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.PropertyField(stringsProperty.GetArrayElementAtIndex(i));
-                    //EditorGUILayout.PropertyField(list.GetArrayElementAtIndex(i), GUIContent.none);
 
                     string UUID = WorldStorageWindow.GetUUIDFromString(stringsProperty.GetArrayElementAtIndex(i).stringValue);
                     if (UUID == null) UUID = anchors[i]; // try this
-                    if (GUILayout.Button("-", EditorStyles.miniButtonLeft, miniButtonWidth))
-                    {
-                        WorldAnchorRequest.DeleteWorldAnchor(worldStorageServer, UUID);
-                        WorldStorageWindowSingleton.GetWorldAnchors();
-                        WorldStorageWindowSingleton.Repaint();
-                    }
                     if (GUILayout.Button("Edit...", EditorStyles.miniButtonLeft, buttonWidth))
                     {
                         Debug.Log("Open Anchor Window");
                         WorldAnchorWindow.ShowWindow(worldStorageServer, worldStorageUser, UUID);
                     }
+
+                    GUI.backgroundColor = WorldStorageWindow.arfColors[3];
+                    if (GUILayout.Button("X", EditorStyles.miniButtonLeft, miniButtonWidth))
+                    {
+                        if (EditorUtility.DisplayDialog("Delete", "Are you sure you want to delete this element?", "Delete", "Cancel"))
+                        {
+                            WorldAnchorRequest.DeleteWorldAnchor(worldStorageServer, UUID);
+                            WorldStorageWindowSingleton.GetWorldAnchors();
+                            WorldStorageWindowSingleton.Repaint();
+                        }
+                    }
+                    GUI.backgroundColor = ori;
+
                     EditorGUILayout.EndHorizontal();
                 }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -345,71 +408,87 @@ namespace ETSI.ARF.WorldStorage.UI
             // Handle Links
             // ###########################################################
             #region Get all link objects
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space();
 
-            GUI.backgroundColor = WorldStorageWindow.arfColors[1];
-            if (GUILayout.Button("Request World Links"))
+            GUILayout.BeginHorizontal();
+            GUI.backgroundColor = WorldStorageWindow.arfColors[9];
+            Texture linkImage = (Texture)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Images/link.png", typeof(Texture));
+            GUILayout.Box(linkImage, GUILayout.Width(24), GUILayout.Height(24));
+            GUI.backgroundColor = ori;
+            GUILayout.Label("World Links:", EditorStyles.whiteBoldLabel);
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            GUI.backgroundColor = WorldStorageWindow.arfColors[0];
+            if (GUILayout.Button("Request Links"))
             {
                 GetWorldLinks();
             }
 
             GUI.backgroundColor = WorldStorageWindow.arfColors[2];
-            if (GUILayout.Button("Create/Edit World Link..."))
+            if (GUILayout.Button("Create New"))
             {
-                Debug.Log("Open World Link Window");
+                Debug.Log("Create link and open window");
                 WorldLinkWindow.ShowWindow(worldStorageServer, worldStorageUser);
             }
 
-            GUI.backgroundColor = WorldStorageWindow.arfColors[3];
-            if (GUILayout.Button("Delete all World Links (3 stay in!!!)"))
+            GUI.backgroundColor = ori;
+            //GUI.backgroundColor = WorldStorageWindow.arfColors[3];
+            if (GUILayout.Button("Delete all Links (3 stay in!!!)"))
             {
-                Debug.Log("Deleting all World Links");
-                int n = 0;
-                string UUID;
-                foreach (var customName in links)
+                if (EditorUtility.DisplayDialog("Deleting elements", "Do you really want to delete all links?", "Yes", "No"))
                 {
-                    if (!customName.Contains("[")) UUID = customName;
-                    else
+                    Debug.Log("Deleting all World Links");
+                    int n = 0;
+                    string UUID;
+                    foreach (var customName in links)
                     {
-                        // extract the UUID
-                        UUID = customName.Split('[', ']')[1];
+                        if (!customName.Contains("[")) UUID = customName;
+                        else
+                        {
+                            // extract the UUID
+                            UUID = customName.Split('[', ']')[1];
+                        }
+                        if (++n > 3) WorldLinkRequest.DeleteWorldLink(worldStorageServer, UUID);
                     }
-                    if (++n > 3) WorldLinkRequest.DeleteWorldLink(worldStorageServer, UUID);
-                }
 
-                GetWorldLinks();
-                WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
+                    GetWorldLinks();
+                    WorldStorageWindow.WorldStorageWindowSingleton.Repaint();
+                }
             }
             GUI.backgroundColor = ori;
+            EditorGUILayout.EndHorizontal();
 
             // Show list
             stringsProperty = so.FindProperty("links");
-            //EditorGUILayout.PropertyField(stringsProperty, /*new GUIContent("Trackbales"),*/ true); // True means show children
-            //so.ApplyModifiedProperties(); // Remember to apply modified properties
-
-            // New version with "Edit" button:
             showListL = EditorGUILayout.BeginFoldoutHeaderGroup(showListL, "List of World Links");
             if (showListL)
                 for (int i = 0; i < stringsProperty.arraySize; i++)
                 {
                     EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.PropertyField(stringsProperty.GetArrayElementAtIndex(i));
-                    //EditorGUILayout.PropertyField(list.GetArrayElementAtIndex(i), GUIContent.none);
 
                     string UUID = WorldStorageWindow.GetUUIDFromString(stringsProperty.GetArrayElementAtIndex(i).stringValue);
                     if (UUID == null) UUID = links[i]; // try this
-                    if (GUILayout.Button("-", EditorStyles.miniButtonLeft, miniButtonWidth))
-                    {
-                        WorldLinkRequest.DeleteWorldLink(worldStorageServer, UUID);
-                        WorldStorageWindowSingleton.GetWorldLinks();
-                        WorldStorageWindowSingleton.Repaint();
-                    }
                     if (GUILayout.Button("Edit...", EditorStyles.miniButtonLeft, buttonWidth))
                     {
                         Debug.Log("Open Link Window");
                         
                         WorldLinkWindow.ShowWindow(worldStorageServer, worldStorageUser, UUID);
                     }
+
+                    GUI.backgroundColor = WorldStorageWindow.arfColors[3];
+                    if (GUILayout.Button("X", EditorStyles.miniButtonLeft, miniButtonWidth))
+                    {
+                        if (EditorUtility.DisplayDialog("Delete", "Are you sure you want to delete this element?", "Delete", "Cancel"))
+                        {
+                            WorldLinkRequest.DeleteWorldLink(worldStorageServer, UUID);
+                            WorldStorageWindowSingleton.GetWorldLinks();
+                            WorldStorageWindowSingleton.Repaint();
+                        }
+                    }
+                    GUI.backgroundColor = ori;
+
                     EditorGUILayout.EndHorizontal();
                 }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -444,6 +523,34 @@ namespace ETSI.ARF.WorldStorage.UI
             }
         }
 
+        static public (string, string) GetFirstKeyValueTags(Dictionary<string, List<string>> dict)
+        {
+            if (dict.Count >= 1)
+            {
+                // Get the first value in account (demo)
+                foreach (var item in dict)
+                {
+                    string key1 = item.Key;
+                    if (item.Value.Count >= 1)
+                    {
+                        string value1 = item.Value[0];
+                        return (key1, value1);
+                    }
+                }
+            }
+            return ("", "");
+        }
+
+        static public Matrix4x4 MatrixFromLocalCRS(List<float> localCRS)
+        {
+            Matrix4x4 matrix = new Matrix4x4();
+            matrix.m00 = localCRS[0]; matrix.m01 = localCRS[1]; matrix.m02 = localCRS[2]; matrix.m03 = localCRS[3];
+            matrix.m10 = localCRS[4]; matrix.m11 = localCRS[5]; matrix.m12 = localCRS[6]; matrix.m13 = localCRS[7];
+            matrix.m20 = localCRS[8]; matrix.m21 = localCRS[9]; matrix.m22 = localCRS[10]; matrix.m23 = localCRS[11];
+            matrix.m30 = localCRS[12]; matrix.m31 = localCRS[13]; matrix.m32 = localCRS[14]; matrix.m33 = localCRS[15];
+            return matrix;
+        }
+
         public void GetTrackables()
         {
             // Get all objects
@@ -452,6 +559,11 @@ namespace ETSI.ARF.WorldStorage.UI
             trackables.Clear();
             foreach (var item in res)
             {
+                if (filterByKeyValueTag != "")
+                {
+                    var first = GetFirstKeyValueTags(item.KeyvalueTags);
+                    if (first.Item1.ToLower() != "group" || first.Item2 != filterByKeyValueTag) continue;
+                }
                 if (!string.IsNullOrEmpty(item.Name)) trackables.Add(item.Name + " [" + item.UUID.ToString() + "]");
                 else trackables.Add(item.UUID.ToString());
             }
@@ -465,6 +577,11 @@ namespace ETSI.ARF.WorldStorage.UI
             anchors.Clear();
             foreach (var item in res)
             {
+                if (filterByKeyValueTag != "")
+                {
+                    var first = GetFirstKeyValueTags(item.KeyvalueTags);
+                    if (first.Item1.ToLower() != "group" || first.Item2 != filterByKeyValueTag) continue;
+                }
                 if (!string.IsNullOrEmpty(item.Name)) anchors.Add(item.Name + " [" + item.UUID.ToString() + "]");
                 else anchors.Add(item.UUID.ToString());
             }

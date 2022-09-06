@@ -1,0 +1,3 @@
+[submodule "Packages/unity-world-storage-package"]
+	path = Packages/unity-world-storage-package
+	url = https://labs.etsi.org/rep/arf/world-storage-api-helpers/unity-world-storage-package.git

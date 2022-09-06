@@ -1,0 +1,9 @@
+{
+  "author": "ETSI-ISG-ARF",
+  "name": "etsi.isg.arf.worldstorage",
+  "version": "0.0.2",
+  "displayName": "ISG-ARF World Storage Package",
+  "description": "REST Wrapper for the World Storage of the Augmented Reality Framework",
+  "unity": "2020.3",
+  "keywords": []
+}

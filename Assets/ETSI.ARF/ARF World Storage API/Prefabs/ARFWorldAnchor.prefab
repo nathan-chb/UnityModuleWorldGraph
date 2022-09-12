@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6557221987491350997}
   m_Layer: 5
   m_Name: Headline
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -146,7 +146,7 @@ GameObject:
   - component: {fileID: 6503384942250313519}
   m_Layer: 0
   m_Name: Axe
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -184,7 +184,7 @@ GameObject:
   - component: {fileID: 1622323168209334416}
   m_Layer: 0
   m_Name: Center
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -280,7 +280,7 @@ GameObject:
   - component: {fileID: 3041298355498540117}
   m_Layer: 5
   m_Name: Text
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -418,7 +418,7 @@ GameObject:
   - component: {fileID: 2090784007532835916}
   m_Layer: 0
   m_Name: Z
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -511,9 +511,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9046317383172441836}
+  - component: {fileID: 6589652208734065649}
   m_Layer: 0
   m_Name: ARFWorldAnchor
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -535,6 +536,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6589652208734065649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8473238451594182910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce8608cfea9613a4e92474a3c814e385, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8638588117357457033
 GameObject:
   m_ObjectHideFlags: 0
@@ -549,7 +562,7 @@ GameObject:
   - component: {fileID: 7677843500006282907}
   m_Layer: 0
   m_Name: Y
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -647,7 +660,7 @@ GameObject:
   - component: {fileID: 2278103916936109689}
   m_Layer: 5
   m_Name: Canvas
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -749,7 +762,7 @@ GameObject:
   - component: {fileID: 7634649738335838124}
   m_Layer: 0
   m_Name: X
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -254,7 +254,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 //uuid
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("UUID ", EditorStyles.boldLabel, GUILayout.Width(50));
-                if (!SaveInfo.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()))
+                if (!UtilGraphSingleton.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()))
                 {
                     EditorGUILayout.LabelField("none yet (element not yet saved in the server)");
                 }
@@ -419,9 +419,9 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     };
                     worldAnchor.WorldAnchorSize = localSizeAsFloat;
 
-                    if (SaveInfo.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()) && (!SaveInfo.instance.elemsToUpdate.Contains(worldAnchor.UUID.ToString())))
+                    if (UtilGraphSingleton.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(worldAnchor.UUID.ToString())))
                     {
-                        SaveInfo.instance.elemsToUpdate.Add(worldAnchor.UUID.ToString());
+                        UtilGraphSingleton.instance.elemsToUpdate.Add(worldAnchor.UUID.ToString());
                     }
                     worldAnchorNode.MarkUnsaved();
                 }
@@ -442,11 +442,11 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 {
                     //lose focus of fields otherwise the selected field won't updaate
                     EditorGUI.FocusTextInControl(null);
-                    if (SaveInfo.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()))
+                    if (UtilGraphSingleton.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()))
                     {
-                        if (SaveInfo.instance.elemsToUpdate.Contains(worldAnchor.UUID.ToString()) && EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
+                        if (UtilGraphSingleton.instance.elemsToUpdate.Contains(worldAnchor.UUID.ToString()) && EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
                         {
-                            worldAnchor = WorldAnchorRequest.GetWorldAnchor(SaveInfo.instance.worldStorageServer, worldAnchor.UUID.ToString());
+                            worldAnchor = WorldAnchorRequest.GetWorldAnchor(UtilGraphSingleton.instance.worldStorageServer, worldAnchor.UUID.ToString());
                             worldAnchorNode.worldAnchor = worldAnchor;
                             ShowWindow(worldAnchorNode);
                         }
@@ -468,7 +468,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                             {
                                 worldAnchorSize.Add(0);
                             }
-                            worldAnchor = new WorldAnchor(Guid.NewGuid(), "DefaultWorldAnchor", Guid.Parse(SaveInfo.instance.worldStorageUser.UUID), localCRS, UnitSystem.CM, worldAnchorSize, new Dictionary<string, List<string>>());
+                            worldAnchor = new WorldAnchor(Guid.NewGuid(), "DefaultWorldAnchor", Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), localCRS, UnitSystem.CM, worldAnchorSize, new Dictionary<string, List<string>>());
                             worldAnchorNode.worldAnchor = worldAnchor;
                             ShowWindow(worldAnchorNode);
                         }
@@ -479,12 +479,12 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 GUI.backgroundColor = Color.green;
                 if (GUILayout.Button("Save"))
                 {
-                    if (SaveInfo.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()))
+                    if (UtilGraphSingleton.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()))
                     {
-                        if (SaveInfo.instance.elemsToUpdate.Contains(worldAnchor.UUID.ToString()))
+                        if (UtilGraphSingleton.instance.elemsToUpdate.Contains(worldAnchor.UUID.ToString()))
                         {
-                            WorldAnchorRequest.UpdateWorldAnchor(SaveInfo.instance.worldStorageServer, worldAnchor);
-                            SaveInfo.instance.elemsToUpdate.Remove(worldAnchor.UUID.ToString());
+                            WorldAnchorRequest.UpdateWorldAnchor(UtilGraphSingleton.instance.worldStorageServer, worldAnchor);
+                            UtilGraphSingleton.instance.elemsToUpdate.Remove(worldAnchor.UUID.ToString());
                         }
                     }
                     else
@@ -497,7 +497,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         worldAnchor.KeyvalueTags["unityAuthoringPosX"] = posX;
                         worldAnchor.KeyvalueTags["unityAuthoringPosY"] = posY;
 
-                        String uuid = WorldAnchorRequest.AddWorldAnchor(SaveInfo.instance.worldStorageServer, worldAnchor);
+                        String uuid = WorldAnchorRequest.AddWorldAnchor(UtilGraphSingleton.instance.worldStorageServer, worldAnchor);
 
                         //change the uuid in its edges, if there is a new edge to be added in the world storage it needs to have the correct uuid
                         uuid = uuid.Replace("\"", "");
@@ -515,7 +515,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
 
                         //Add the newly saved World Anchor to the SaveInfo singleton
                         Rect trackPos = new(worldAnchorNode.GetPosition().x, worldAnchorNode.GetPosition().y, 135, 77);
-                        SaveInfo.instance.nodePositions[uuid] = trackPos;
+                        UtilGraphSingleton.instance.nodePositions[uuid] = trackPos;
                     }
                     worldAnchorNode.MarkSaved();
                 }
@@ -533,6 +533,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         {
             if (trackable != null)
             {
+
                 //
                 //HEADER
                 //
@@ -577,7 +578,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 //uuid
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("UUID ", EditorStyles.boldLabel, GUILayout.Width(50));
-                if (!SaveInfo.instance.nodePositions.ContainsKey(trackable.UUID.ToString()))
+                if (!UtilGraphSingleton.instance.nodePositions.ContainsKey(trackable.UUID.ToString()))
                 {
                     EditorGUILayout.LabelField("none yet (element not yet saved in the server)");
                 }
@@ -591,9 +592,17 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 EditorGUILayout.BeginHorizontal();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.LabelField("Name ", EditorStyles.boldLabel, GUILayout.Width(50));
+                var oldName = trackable.Name.ToString();
                 trackable.Name = EditorGUILayout.DelayedTextField(trackable.Name);
                 if (EditorGUI.EndChangeCheck())
                 {
+                    //change the name of the GO
+                    GameObject trackGO = GameObject.Find(oldName);
+                    if (trackGO != null)
+                    {
+                        trackGO.name = trackable.Name;
+                    }
+
                     trackableNode.title = trackable.Name;
                 }
                 EditorGUILayout.EndHorizontal();
@@ -845,9 +854,9 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     };
                     trackable.TrackableSize = localSizeAsFloat;
 
-                    if (SaveInfo.instance.nodePositions.ContainsKey(trackable.UUID.ToString()) && (!SaveInfo.instance.elemsToUpdate.Contains(trackable.UUID.ToString())))
+                    if (UtilGraphSingleton.instance.nodePositions.ContainsKey(trackable.UUID.ToString()) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(trackable.UUID.ToString())))
                     {
-                        SaveInfo.instance.elemsToUpdate.Add(trackable.UUID.ToString());
+                        UtilGraphSingleton.instance.elemsToUpdate.Add(trackable.UUID.ToString());
                     }
                     trackableNode.MarkUnsaved();
                 }
@@ -867,11 +876,11 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 {
                     //lose focus of fields otherwise the selected field won't updaate
                     EditorGUI.FocusTextInControl(null);
-                    if (SaveInfo.instance.nodePositions.ContainsKey(trackable.UUID.ToString()))
+                    if (UtilGraphSingleton.instance.nodePositions.ContainsKey(trackable.UUID.ToString()))
                     {
-                        if (SaveInfo.instance.elemsToUpdate.Contains(trackable.UUID.ToString()) && EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
+                        if (UtilGraphSingleton.instance.elemsToUpdate.Contains(trackable.UUID.ToString()) && EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
                         {
-                            trackable = TrackableRequest.GetTrackable(SaveInfo.instance.worldStorageServer, trackable.UUID.ToString());
+                            trackable = TrackableRequest.GetTrackable(UtilGraphSingleton.instance.worldStorageServer, trackable.UUID.ToString());
                             trackableNode.trackable = trackable;
                             ShowWindow(trackableNode);
                         }
@@ -896,7 +905,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                                 trackableSize.Add(0);
                             }
 
-                            Trackable trackable = new Trackable(Guid.NewGuid(), "Defaulttrackable", Guid.Parse(SaveInfo.instance.worldStorageUser.UUID), Trackable.TrackableTypeEnum.OTHER, trackableEncodingInformation, new byte[64], localCRS, UnitSystem.CM, trackableSize, new Dictionary<string, List<string>>());
+                            Trackable trackable = new Trackable(Guid.NewGuid(), "Defaulttrackable", Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), Trackable.TrackableTypeEnum.OTHER, trackableEncodingInformation, new byte[64], localCRS, UnitSystem.CM, trackableSize, new Dictionary<string, List<string>>());
                             trackableNode.trackable = trackable;
                             ShowWindow(trackableNode);
                         }
@@ -907,12 +916,12 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 GUI.backgroundColor = Color.green;
                 if (GUILayout.Button("Save"))
                 {
-                    if (SaveInfo.instance.nodePositions.ContainsKey(trackable.UUID.ToString()))
+                    if (UtilGraphSingleton.instance.nodePositions.ContainsKey(trackable.UUID.ToString()))
                     {
-                        if (SaveInfo.instance.elemsToUpdate.Contains(trackable.UUID.ToString()))
+                        if (UtilGraphSingleton.instance.elemsToUpdate.Contains(trackable.UUID.ToString()))
                         {
-                            TrackableRequest.UpdateTrackable(SaveInfo.instance.worldStorageServer, trackable);
-                            SaveInfo.instance.elemsToUpdate.Remove(trackable.UUID.ToString());
+                            TrackableRequest.UpdateTrackable(UtilGraphSingleton.instance.worldStorageServer, trackable);
+                            UtilGraphSingleton.instance.elemsToUpdate.Remove(trackable.UUID.ToString());
                         }
                     }
                     else
@@ -924,7 +933,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         Trackable trackable = trackableNode.trackable;
                         trackable.KeyvalueTags["unityAuthoringPosX"] = posX;
                         trackable.KeyvalueTags["unityAuthoringPosY"] = posY;
-                        String uuid = TrackableRequest.AddTrackable(SaveInfo.instance.worldStorageServer, trackable);
+                        String uuid = TrackableRequest.AddTrackable(UtilGraphSingleton.instance.worldStorageServer, trackable);
 
                         //change the uuid in its edges, if there is a new edge to be added in the world storage it needs to have the correct uuid
                         uuid = uuid.Replace("\"", "");
@@ -942,7 +951,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
 
                         //Add the newly saved Trackable to the SaveInfo singleton
                         Rect trackPos = new(trackableNode.GetPosition().x, trackableNode.GetPosition().y, 135, 77);
-                        SaveInfo.instance.nodePositions[uuid] = trackPos;
+                        UtilGraphSingleton.instance.nodePositions[uuid] = trackPos;
                     }
                     trackableNode.MarkSaved();
                 }
@@ -1001,7 +1010,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 //uuid
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("UUID ", EditorStyles.boldLabel, GUILayout.Width(50));
-                if (!SaveInfo.instance.linkIds.Contains(worldLink.UUID.ToString()))
+                if (!UtilGraphSingleton.instance.linkIds.Contains(worldLink.UUID.ToString()))
                 {
                     EditorGUILayout.LabelField("none yet (element not yet saved in the server)");
                 }
@@ -1026,7 +1035,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(50);
                 EditorGUILayout.LabelField("UUID ", GUILayout.Width(75));
-                if (SaveInfo.instance.nodePositions.ContainsKey(worldLink.UUIDFrom.ToString()))
+                if (UtilGraphSingleton.instance.nodePositions.ContainsKey(worldLink.UUIDFrom.ToString()))
                 {
                     EditorGUILayout.LabelField(worldLink.UUIDFrom.ToString());
                 }
@@ -1051,7 +1060,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(50);
                 EditorGUILayout.LabelField("UUID ", GUILayout.Width(70));
-                if (SaveInfo.instance.nodePositions.ContainsKey(worldLink.UUIDTo.ToString()))
+                if (UtilGraphSingleton.instance.nodePositions.ContainsKey(worldLink.UUIDTo.ToString()))
                 {
                     EditorGUILayout.LabelField(worldLink.UUIDTo.ToString());
                 }
@@ -1110,9 +1119,9 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     };
                     worldLink.Transform = localCRSasFloat;
 
-                    if (SaveInfo.instance.linkIds.Contains(worldLink.UUID.ToString()) && (!SaveInfo.instance.elemsToUpdate.Contains(worldLink.UUID.ToString())))
+                    if (UtilGraphSingleton.instance.linkIds.Contains(worldLink.UUID.ToString()) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(worldLink.UUID.ToString())))
                     {
-                        SaveInfo.instance.elemsToUpdate.Add(worldLink.UUID.ToString());
+                        UtilGraphSingleton.instance.elemsToUpdate.Add(worldLink.UUID.ToString());
                     }
                     worldLinkEdge.MarkUnsaved();
                 }
@@ -1132,11 +1141,11 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 {
                     //lose focus of fields otherwise the selected field won't updaate
                     EditorGUI.FocusTextInControl(null);
-                    if (SaveInfo.instance.linkIds.Contains(worldLink.UUID.ToString()))
+                    if (UtilGraphSingleton.instance.linkIds.Contains(worldLink.UUID.ToString()))
                     {
-                        if (SaveInfo.instance.elemsToUpdate.Contains(worldLink.UUID.ToString()) && EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
+                        if (UtilGraphSingleton.instance.elemsToUpdate.Contains(worldLink.UUID.ToString()) && EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
                         {
-                            worldLink = WorldLinkRequest.GetWorldLink(SaveInfo.instance.worldStorageServer, worldLink.UUID.ToString());
+                            worldLink = WorldLinkRequest.GetWorldLink(UtilGraphSingleton.instance.worldStorageServer, worldLink.UUID.ToString());
                             worldLinkEdge.worldLink = worldLink;
                             ShowWindow(worldLinkEdge);
                         }
@@ -1165,25 +1174,25 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 if (GUILayout.Button("Save"))
                 {
                         //if one of the connected elements is not in the server, you can't save the link
-                    if ((SaveInfo.instance.nodePositions.ContainsKey(worldLink.UUIDTo.ToString()) && SaveInfo.instance.nodePositions.ContainsKey(worldLink.UUIDFrom.ToString())))
+                    if ((UtilGraphSingleton.instance.nodePositions.ContainsKey(worldLink.UUIDTo.ToString()) && UtilGraphSingleton.instance.nodePositions.ContainsKey(worldLink.UUIDFrom.ToString())))
                     { 
-                        if (SaveInfo.instance.linkIds.Contains(worldLink.UUID.ToString()))
+                        if (UtilGraphSingleton.instance.linkIds.Contains(worldLink.UUID.ToString()))
                         {
-                            if (SaveInfo.instance.elemsToUpdate.Contains(worldLink.UUID.ToString()))
+                            if (UtilGraphSingleton.instance.elemsToUpdate.Contains(worldLink.UUID.ToString()))
                             {
-                                WorldLinkRequest.UpdateWorldLink(SaveInfo.instance.worldStorageServer, worldLink);
-                                SaveInfo.instance.elemsToUpdate.Remove(worldLink.UUID.ToString());
+                                WorldLinkRequest.UpdateWorldLink(UtilGraphSingleton.instance.worldStorageServer, worldLink);
+                                UtilGraphSingleton.instance.elemsToUpdate.Remove(worldLink.UUID.ToString());
                             }
                         }
                         else
                         {
-                            String uuid = WorldLinkRequest.AddWorldLink(SaveInfo.instance.worldStorageServer, worldLink);
+                            String uuid = WorldLinkRequest.AddWorldLink(UtilGraphSingleton.instance.worldStorageServer, worldLink);
 
                             //Add the newly saved WorldLink to the SaveInfo singleton
                             uuid = uuid.Replace("\"", "");
                             worldLink.UUID = Guid.Parse(uuid);
                             worldLinkEdge.GUID = uuid;
-                            SaveInfo.instance.linkIds.Add(uuid);
+                            UtilGraphSingleton.instance.linkIds.Add(uuid);
                         }
                         worldLinkEdge.MarkSaved();
                     }

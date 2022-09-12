@@ -33,10 +33,10 @@ public class WorldStorageInfoEditor : Editor
         EditorGUILayout.Space();
         WorldStorageInfo srv = (WorldStorageInfo)target;
 
-        string state = srv.GetServerState();
+        /*string state = srv.GetServerState();
         EditorGUILayout.LabelField("Server State", state);
 
         string api = srv.GetAPIVersion();
-        EditorGUILayout.LabelField("OpenAPI Version", api);
+        EditorGUILayout.LabelField("OpenAPI Version", api);*/
     }
 }

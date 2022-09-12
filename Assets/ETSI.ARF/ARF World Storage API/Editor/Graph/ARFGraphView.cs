@@ -75,9 +75,9 @@ namespace ETSI.ARF.WorldStorage.UI
             //remove from the graph all the deleted elements
             if (EditorUtility.DisplayDialog("Deleting elements", message, "Yes", "No"))
             {
-                if (SaveInfo.instance.elemsToRemove == null)
+                if (UtilGraphSingleton.instance.elemsToRemove == null)
                 {
-                    SaveInfo.instance.elemsToRemove = new Dictionary<string, Type>();
+                    UtilGraphSingleton.instance.elemsToRemove = new Dictionary<string, Type>();
                 }
                 foreach (GraphElement elt in selection.ToArray())
                 {
@@ -85,9 +85,9 @@ namespace ETSI.ARF.WorldStorage.UI
                     if (nodeAnchor != null)
                     {
                         nodeAnchor.DisconnectAllPorts(this);
-                        if (SaveInfo.instance.nodePositions.ContainsKey(nodeAnchor.GUID))
+                        if (UtilGraphSingleton.instance.nodePositions.ContainsKey(nodeAnchor.GUID))
                         {
-                            SaveInfo.instance.elemsToRemove.Add(nodeAnchor.GUID, typeof(WorldAnchor));
+                            UtilGraphSingleton.instance.elemsToRemove.Add(nodeAnchor.GUID, typeof(WorldAnchor));
                         }
                         RemoveElement(elt);
                         continue;
@@ -96,9 +96,9 @@ namespace ETSI.ARF.WorldStorage.UI
                     if (nodeTrackable != null)
                     {
                         nodeTrackable.DisconnectAllPorts(this);
-                        if (SaveInfo.instance.nodePositions.ContainsKey(nodeTrackable.GUID))
+                        if (UtilGraphSingleton.instance.nodePositions.ContainsKey(nodeTrackable.GUID))
                         {
-                            SaveInfo.instance.elemsToRemove.Add(nodeTrackable.GUID, typeof(Trackable));
+                            UtilGraphSingleton.instance.elemsToRemove.Add(nodeTrackable.GUID, typeof(Trackable));
                         }
                         RemoveElement(elt);
                         continue;
@@ -108,9 +108,9 @@ namespace ETSI.ARF.WorldStorage.UI
                     {
                         edgeLink.input.Disconnect(edgeLink);
                         edgeLink.output.Disconnect(edgeLink);
-                        if (SaveInfo.instance.linkIds.Contains(edgeLink.GUID))
+                        if (UtilGraphSingleton.instance.linkIds.Contains(edgeLink.GUID))
                         {
-                            SaveInfo.instance.elemsToRemove.Add(edgeLink.GUID, typeof(WorldLink));
+                            UtilGraphSingleton.instance.elemsToRemove.Add(edgeLink.GUID, typeof(WorldLink));
                         }
                         RemoveElement(elt);
                         continue;
@@ -143,7 +143,7 @@ namespace ETSI.ARF.WorldStorage.UI
                         SaveInServer();
                     }
                     Reload();
-                    SaveInfo.instance.toReFrame = true;
+                    UtilGraphSingleton.instance.toReFrame = true;
                 }, (DropdownMenuAction a) => DropdownMenuAction.Status.Normal);
                 evt.menu.AppendAction("Create Trackable", delegate
                 {
@@ -151,7 +151,18 @@ namespace ETSI.ARF.WorldStorage.UI
                     EncodingInformationStructure trackableEncodingInformation = new EncodingInformationStructure(EncodingInformationStructure.DataFormatEnum.OTHER, "0");
 
                     List<float> localCRS = new();
-                    for (int i = 0; i < 15; i++)
+                    localCRS.Add(1);
+                    for (int i = 1; i < 5; i++)
+                    {
+                        localCRS.Add(0);
+                    }
+                    localCRS.Add(1);
+                    for (int i = 6; i < 10; i++)
+                    {
+                        localCRS.Add(0);
+                    }
+                    localCRS.Add(1);
+                    for (int i = 11; i < 15; i++)
                     {
                         localCRS.Add(0);
                     }
@@ -171,7 +182,6 @@ namespace ETSI.ARF.WorldStorage.UI
                     {
                         for (int i = 0; i < defaultNodes.Count(); i++)
                         {
-                            Debug.Log($"{i} : " + defaultNodes.ElementAt(i).title);
                             if (!(defaultNodes.Where(node => node.title.EndsWith((i + 1).ToString() + ")")).Any()))
                             {
                                 name = name + " (" + (i + 1).ToString() + ")";
@@ -190,9 +200,20 @@ namespace ETSI.ARF.WorldStorage.UI
                 }, (DropdownMenuAction a) => DropdownMenuAction.Status.Normal);
                 evt.menu.AppendAction("Create World Anchor", delegate
                 {
-                //generate the worldAnchor attributes
-                List<float> localCRS = new List<float>();
-                    for (int i = 0; i < 15; i++)
+                    //generate the worldAnchor attributes
+                    List<float> localCRS = new List<float>();
+                    localCRS.Add(1);
+                    for (int i = 1; i < 5; i++)
+                    {
+                        localCRS.Add(0);
+                    }
+                    localCRS.Add(1);
+                    for (int i = 6; i < 10; i++)
+                    {
+                        localCRS.Add(0);
+                    }
+                    localCRS.Add(1);
+                    for (int i = 11; i < 15; i++)
                     {
                         localCRS.Add(0);
                     }
@@ -243,7 +264,7 @@ namespace ETSI.ARF.WorldStorage.UI
 
         public bool ServerAndLocalDifferent()
         {
-            if ((SaveInfo.instance.elemsToRemove.Count != 0) || (SaveInfo.instance.elemsToUpdate.Count != 0))
+            if ((UtilGraphSingleton.instance.elemsToRemove.Count != 0) || (UtilGraphSingleton.instance.elemsToUpdate.Count != 0))
             {
                 return true;
             }
@@ -251,14 +272,14 @@ namespace ETSI.ARF.WorldStorage.UI
             {
                 float nodeX = node.GetPosition().x;
                 float nodeY = node.GetPosition().y;
-                if (!SaveInfo.instance.nodePositions.ContainsKey(node.GUID))
+                if (!UtilGraphSingleton.instance.nodePositions.ContainsKey(node.GUID))
                 {
                     return true;
                 }
                 else
                 {
-                    float dataX = SaveInfo.instance.nodePositions[node.GUID].x;
-                    float dataY = SaveInfo.instance.nodePositions[node.GUID].y;
+                    float dataX = UtilGraphSingleton.instance.nodePositions[node.GUID].x;
+                    float dataY = UtilGraphSingleton.instance.nodePositions[node.GUID].y;
                     if ((nodeX != dataX) || (nodeY != dataY))
                     {
                         return true;
@@ -267,7 +288,7 @@ namespace ETSI.ARF.WorldStorage.UI
             }
             foreach (ARFEdgeLink edge in edges)
             {
-                if (!SaveInfo.instance.linkIds.Contains(edge.GUID))
+                if (!UtilGraphSingleton.instance.linkIds.Contains(edge.GUID))
                 {
                     return true;
                 }
@@ -296,7 +317,7 @@ namespace ETSI.ARF.WorldStorage.UI
                 var waNode = new ARFNodeWorldAnchor(worldAnchor);
 
                 Rect posTemp = new(26, 93, 160, 77);
-                SaveInfo.instance.nodePositions.TryGetValue(worldAnchor.UUID.ToString(), out posTemp);
+                UtilGraphSingleton.instance.nodePositions.TryGetValue(worldAnchor.UUID.ToString(), out posTemp);
                 waNode.SetPosition(posTemp);
 
                 AddElement(waNode);
@@ -307,7 +328,7 @@ namespace ETSI.ARF.WorldStorage.UI
                 var tracknode = new ARFNodeTrackable(trackable);
 
                 Rect posTemp = new(26, 93, 160, 77);
-                SaveInfo.instance.nodePositions.TryGetValue(trackable.UUID.ToString(), out posTemp);
+                UtilGraphSingleton.instance.nodePositions.TryGetValue(trackable.UUID.ToString(), out posTemp);
                 tracknode.SetPosition(posTemp);
 
                 AddElement(tracknode);
@@ -361,7 +382,7 @@ namespace ETSI.ARF.WorldStorage.UI
         {
             GraphEditorWindow.ResetWindow();
             DeleteElements(graphElements);
-            SaveInfo.instance.InitNodePos(worldStorageServer, worldStorageUser);
+            UtilGraphSingleton.instance.InitNodePos(worldStorageServer, worldStorageUser);
             PaintWorldStorage();
             FrameAllElements();
         }
@@ -506,7 +527,7 @@ namespace ETSI.ARF.WorldStorage.UI
         public void SaveInServer()
         {
             //DELETE ELEMENTS FROM THE SERVER
-            foreach (KeyValuePair<String, Type> elemToRemove in SaveInfo.instance.elemsToRemove)
+            foreach (KeyValuePair<String, Type> elemToRemove in UtilGraphSingleton.instance.elemsToRemove)
             {
                 string typeName = elemToRemove.Value.Name;
                 switch (typeName)
@@ -530,7 +551,7 @@ namespace ETSI.ARF.WorldStorage.UI
             //UPDATE AND ADD ELEMENTS
             foreach (ARFNode node in nodes)
             {
-                if (!SaveInfo.instance.nodePositions.ContainsKey(node.GUID))
+                if (!UtilGraphSingleton.instance.nodePositions.ContainsKey(node.GUID))
                 {
                     //POST TRACKABLE
                     if (node is ARFNodeTrackable aRFNodeTrackable)
@@ -590,9 +611,9 @@ namespace ETSI.ARF.WorldStorage.UI
                 {
                     float xLocal = node.GetPosition().x;
                     float yLocal = node.GetPosition().y;
-                    float xServer = SaveInfo.instance.nodePositions[node.GUID].x; ;
-                    float yServer = SaveInfo.instance.nodePositions[node.GUID].y;
-                    if (((xLocal != xServer) || (yLocal != yServer)) || SaveInfo.instance.elemsToUpdate.Contains(node.GUID))
+                    float xServer = UtilGraphSingleton.instance.nodePositions[node.GUID].x; ;
+                    float yServer = UtilGraphSingleton.instance.nodePositions[node.GUID].y;
+                    if (((xLocal != xServer) || (yLocal != yServer)) || UtilGraphSingleton.instance.elemsToUpdate.Contains(node.GUID))
                     {
                         if(node is ARFNodeTrackable aRFNodeTrackable)
                         {
@@ -626,7 +647,7 @@ namespace ETSI.ARF.WorldStorage.UI
             {
                 if (edge is ARFEdgeLink aRFEdgeLink)
                 {
-                    if (!SaveInfo.instance.linkIds.Contains(aRFEdgeLink.GUID))
+                    if (!UtilGraphSingleton.instance.linkIds.Contains(aRFEdgeLink.GUID))
                     {
                         WorldLink worldLink = aRFEdgeLink.worldLink;
                         string uuid = WorldLinkRequest.AddWorldLink(worldStorageServer, worldLink);
@@ -635,7 +656,7 @@ namespace ETSI.ARF.WorldStorage.UI
                         aRFEdgeLink.worldLink.UUID = Guid.Parse(uuid);
                         aRFEdgeLink.GUID = uuid;
                     }
-                    else if (SaveInfo.instance.elemsToUpdate.Contains(aRFEdgeLink.GUID))
+                    else if (UtilGraphSingleton.instance.elemsToUpdate.Contains(aRFEdgeLink.GUID))
                     {
                         WorldLink worldLink = aRFEdgeLink.worldLink;
                         WorldLinkRequest.UpdateWorldLink(worldStorageServer, worldLink);
@@ -643,9 +664,10 @@ namespace ETSI.ARF.WorldStorage.UI
                     aRFEdgeLink.MarkSaved();
                 }
             }
-            SaveInfo.instance.InitNodePos(worldStorageServer, worldStorageUser);
+            UtilGraphSingleton.instance.InitNodePos(worldStorageServer, worldStorageUser);
 
             GraphEditorWindow.ResetWindow();
         }
+
     }
 }

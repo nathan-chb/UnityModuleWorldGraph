@@ -95,7 +95,7 @@ namespace ETSI.ARF.WorldStorage.UI
 
         public static GameObject GenerateAndUpdateVisual(string UUID, string name, Vector3 pos, Vector3 rot)
         {
-            ETSI.ARF.WorldStorage.UI.Prefabs.WorldStoragePrefabs prefabs;
+            Prefabs.WorldStoragePrefabs prefabs;
             prefabs = (Prefabs.WorldStoragePrefabs)Resources.Load("ARFPrefabs");
             GameObject arf = GameObject.Find("ARF Visuals");
             GameObject visual = GameObject.Find(UUID);

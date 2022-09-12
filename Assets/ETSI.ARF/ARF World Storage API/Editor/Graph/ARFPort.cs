@@ -44,13 +44,24 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
             if (edge is ARFEdgeLink aRFedge)
             {
                 List<float> transform = new List<float>();
-                for (int i = 0; i < 15; i++)
+                transform.Add(1);
+                for (int i = 1; i < 5; i++)
+                {
+                    transform.Add(0);
+                }
+                transform.Add(1);
+                for (int i = 6; i < 10; i++)
+                {
+                    transform.Add(0);
+                }
+                transform.Add(1);
+                for (int i = 11; i < 15; i++)
                 {
                     transform.Add(0);
                 }
                 transform.Add(1);
 
-                WorldLink worldLink = new(Guid.NewGuid(), Guid.Parse(SaveInfo.instance.worldStorageUser.UUID), Guid.Parse(fromNode.GUID), Guid.Parse(toNode.GUID), fromNode.GetElemType(), toNode.GetElemType(), transform, UnitSystem.CM, new Dictionary<string, List<string>>());
+                WorldLink worldLink = new(Guid.NewGuid(), Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), Guid.Parse(fromNode.GUID), Guid.Parse(toNode.GUID), fromNode.GetElemType(), toNode.GetElemType(), transform, UnitSystem.CM, new Dictionary<string, List<string>>());
                 aRFedge.worldLink = worldLink;
             }
         }

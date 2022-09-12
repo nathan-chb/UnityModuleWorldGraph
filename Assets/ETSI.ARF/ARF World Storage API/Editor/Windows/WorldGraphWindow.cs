@@ -22,7 +22,6 @@ using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph;
 using ETSI.ARF.WorldStorage;
 using ETSI.ARF.WorldStorage.REST;
 using ETSI.ARF.WorldStorage.UI;
-using Org.OpenAPITools.Model;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -36,7 +35,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
     public class WorldGraphWindow : EditorWindow
     {
 
-        [HideInInspector] public WorldStorageServer worldStorageServer;
+        public WorldStorageServer worldStorageServer;
         [HideInInspector] public WorldStorageUser worldStorageUser;
 
         private ARFGraphView myGraph;
@@ -47,7 +46,9 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         [MenuItem("ARFWorldStorage/Edit Graph...")]
         public static void ShowWindow()
         {
-            GetWindow<WorldGraphWindow>("Graph Editor", true, typeof(SceneView));
+            var window = GetWindow<WorldGraphWindow>("Graph Editor", true, typeof(SceneView));
+            Debug.Log(AdminRequest.Ping(window.worldStorageServer));
+            window.Show();
         }
 
         public void OnEnable()
@@ -56,9 +57,9 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             if (worldStorageServer != null)
             {
                 try { 
-                    if (SaveInfo.instance.nodePositions == null)
+                    if (UtilGraphSingleton.instance.nodePositions == null)
                     {
-                        SaveInfo.instance.InitNodePos(worldStorageServer, worldStorageUser);
+                        UtilGraphSingleton.instance.InitNodePos(worldStorageServer, worldStorageUser);
                     }
                     ConstructGraphView();
                     myGraph.style.top = Length.Percent(11);
@@ -87,15 +88,15 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             myGraph.style.top = Length.Percent(11);
             myGraph.PaintWorldStorage();
             myGraph.StretchToParentSize();
-            SaveInfo.instance.toReFrame = true;
+            UtilGraphSingleton.instance.toReFrame = true;
         }
 
 
         void OnGUI()
         {
-            if (SaveInfo.instance.nodePositions == null)
+            if (UtilGraphSingleton.instance.nodePositions == null)
             {
-                SaveInfo.instance.InitNodePos(worldStorageServer, worldStorageUser);
+                UtilGraphSingleton.instance.InitNodePos(worldStorageServer, worldStorageUser);
             }
 
 
@@ -119,7 +120,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 {
                     try
                     {
-                        SaveInfo.instance.InitNodePos(worldStorageServer, worldStorageUser);
+                        UtilGraphSingleton.instance.InitNodePos(worldStorageServer, worldStorageUser);
                         ConstructGraphView();
                         myGraph.style.top = Length.Percent(11);
                         myGraph.style.bottom = Length.Percent(5);
@@ -147,13 +148,13 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             GUILayout.Label("Copyright (C) 2022, ETSI (BSD 3-Clause License)", leftStyle);
 
             //reframe all elements to see them all
-            if (SaveInfo.instance.toReFrame && (twoFrames == 2))
+            if (UtilGraphSingleton.instance.toReFrame && (twoFrames == 2))
             {
                 myGraph.FrameAllElements();
-                SaveInfo.instance.toReFrame = false;
+                UtilGraphSingleton.instance.toReFrame = false;
                 twoFrames = 0;
             }
-            else if (SaveInfo.instance.toReFrame)
+            else if (UtilGraphSingleton.instance.toReFrame)
             {
                 twoFrames++;
             }
@@ -176,6 +177,11 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     GUILayout.EndHorizontal();
                 }
             }
+
+            if(GUILayout.Button("generateGraph :clown_emoji:"))
+            {
+                SceneBuilder.InstantiateGraph(myGraph);
+            }
         }
 
         public void DeleteNode(ARFNode node)
@@ -192,81 +198,13 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             myGraph.DeleteElements(new List<GraphElement> { edge });
             rootVisualElement.Add(myGraph);
         }
-    }
 
-    public class SaveInfo : ScriptableSingleton<SaveInfo>
-    {
-        [SerializeField]
-        public Dictionary<String, Rect> nodePositions;
-        public List<String> linkIds;
-
-        public Dictionary<String,Type> elemsToRemove;
-        public List<String> elemsToUpdate;
-
-        //keep the info of the graph reframe
-        public Boolean toReFrame = false;
-
-        public WorldStorageServer worldStorageServer;
-        public WorldStorageUser worldStorageUser;
-
-        public void InitNodePos(WorldStorageServer server, WorldStorageUser user)
+        public static void RenameNode(String name, ARFNode node)
         {
-            worldStorageServer = server;
-            worldStorageUser = user;
+            var window = WorldGraphWindow.GetWindow<WorldGraphWindow>("Graph Editor", true, typeof(SceneView));
+            var graph = window.myGraph;
 
-            instance.nodePositions = new Dictionary<string, Rect>();
-            foreach (Trackable track in TrackableRequest.GetAllTrackables(worldStorageServer))
-            {
-                if (track.KeyvalueTags.ContainsKey("unityAuthoringPosX") && track.KeyvalueTags.ContainsKey("unityAuthoringPosY"))
-                {
-                    var posX = RoundToNearestHalf(float.Parse(track.KeyvalueTags["unityAuthoringPosX"][0]));
-                    var posY = RoundToNearestHalf(float.Parse(track.KeyvalueTags["unityAuthoringPosY"][0]));
-                    Rect trackPos = new(posX, posY, 135, 77);
-                    instance.nodePositions[track.UUID.ToString()] = trackPos;
-                }
-                else
-                {
-                    Rect trackPos = new(0, 0, 135, 77);
-                    instance.nodePositions[track.UUID.ToString()] = trackPos;
-                }
-            }
-            foreach (WorldAnchor wa in WorldAnchorRequest.GetAllWorldAnchors(worldStorageServer))
-            {
-                if (wa.KeyvalueTags.ContainsKey("unityAuthoringPosX") && wa.KeyvalueTags.ContainsKey("unityAuthoringPosY"))
-                {
-                    var posX = RoundToNearestHalf(float.Parse(wa.KeyvalueTags["unityAuthoringPosX"][0]));
-                    var posY = RoundToNearestHalf(float.Parse(wa.KeyvalueTags["unityAuthoringPosY"][0]));
-                    Rect waPos = new(posX, posY, 135, 77);
-                    instance.nodePositions[wa.UUID.ToString()] = waPos;
-                }
-                else
-                {
-                    Rect trackPos = new(0, 0, 135, 77);
-                    instance.nodePositions[wa.UUID.ToString()] = trackPos;
-                }
-            }
-
-            instance.linkIds = new List<string>();
-            foreach (WorldLink link in WorldLinkRequest.GetAllWorldLinks(worldStorageServer))
-            {
-                instance.linkIds.Add(link.UUID.ToString());
-            }
-
-            instance.elemsToRemove = new Dictionary<string, Type>();
-            instance.elemsToUpdate = new List<string>();
-        }
-
-        //method to predict the position of a node (the float that will be saved in the PositionInfo singleton)
-        public static float RoundToNearestHalf(float a)
-        {
-            return a = Mathf.Round(a * 2f) * 0.5f;
-        }
-
-        public static void PrintInfo()
-        {
-            Debug.Log("elems to delete : " + string.Join(", ", instance.elemsToRemove.Keys));
-            Debug.Log("elems to update : " + string.Join(", ", instance.elemsToUpdate));
-            Debug.Log("elems tout court : " + string.Join(", ", instance.nodePositions.Keys));
+            graph.GetNodeByGuid(node.GUID).title = name;
         }
     }
 }

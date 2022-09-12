@@ -84,7 +84,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
                 edge.input.Connect(item);
                 edge.output.Connect(item);
             }
-            if (!SaveInfo.instance.linkIds.Contains(((ARFEdgeLink)edge).GUID))
+            if (!UtilGraphSingleton.instance.linkIds.Contains(((ARFEdgeLink)edge).GUID))
             {
                 ((ARFEdgeLink)edge).MarkUnsaved();
             }

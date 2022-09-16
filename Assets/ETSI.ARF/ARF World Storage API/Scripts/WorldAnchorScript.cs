@@ -13,12 +13,18 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
         // Use this for initialization
         void Start()
         {
-
+            transform.hasChanged = false;
         }
 
         // Update is called once per frame
         void Update()
         {
+            if (transform.hasChanged)
+            {
+                //TODO change the link trasform
+                print("The transform has changed!");
+                transform.hasChanged = false;
+            }
         }
     }
 }

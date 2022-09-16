@@ -24,6 +24,7 @@ public class SceneBuilder : MonoBehaviour
     {
     }
 
+    //TO REMOVE
     [MenuItem("Examples/Instantiate trackable")]
     static void InstantiatePrefab()
     {
@@ -33,46 +34,39 @@ public class SceneBuilder : MonoBehaviour
 
     public static void InstantiateGraph(ARFGraphView graphview)
     {
-        //TODO delete old GO
-        var objects = GameObject.FindObjectsOfType<GameObject>();
-        foreach (GameObject o in objects)
+        //delete old GO
+        //delete Elements prefab
+        foreach (var pref in FindElementsPrefabInstances())
         {
-            DestroyImmediate(o.gameObject);
+            DestroyImmediate(pref);
         }
 
-        //TODO extract all roots elem
+        //extract all roots elem
         List<ARFNode> roots = GetRoots(graphview);
 
-        //TODO instantiate GO from root elem
-        foreach(ARFNode root in roots)
+        //instantiate GO from root elem
+        foreach (ARFNode root in roots)
         {
-            GenerateTreeFromRoot(root, Matrix4x4.identity);
+            GenerateTreeFromRoot(root, Matrix4x4.identity, null);
         }
-
-        /*
-        foreach (ARFNodeTrackable node in graphview.nodes)
-        {
-            Debug.Log(node.trackable.Name + " " + node.trackable.UUID.ToString());
-            UtilGraphSingleton.instance.elemsToUpdate.Add(node.trackable.UUID.ToString());
-            node.trackable.Name = "nathan";
-            node.title = "nathan";
-        }*/
     }
 
-    private static void GenerateTreeFromRoot(ARFNode root, Matrix4x4 transform)
+    private static void GenerateTreeFromRoot(ARFNode root, Matrix4x4 transform, GameObject parent)
     {
         //check if root is WA or Trackable
         //create the root GO
-        if(root is ARFNodeTrackable)
+        GameObject newGameObject;
+        if (root is ARFNodeTrackable)
         {
-            InstantiateTrackableGO(((ARFNodeTrackable)root).trackable, transform);
+            newGameObject = InstantiateTrackableGO(((ARFNodeTrackable)root).trackable, transform, parent);
         }
         else if(root is ARFNodeWorldAnchor)
         {
-            InstantiateWorldAnchorGO(((ARFNodeWorldAnchor)root).worldAnchor, transform);
+            newGameObject = InstantiateWorldAnchorGO(((ARFNodeWorldAnchor)root).worldAnchor, transform, parent);
         }
         else
         {
+            newGameObject = null;
             Debug.Log("Pas censé être là");
         }
 
@@ -100,12 +94,12 @@ public class SceneBuilder : MonoBehaviour
 
             //get the node and recursive call with the updtaed position
             var childNode = (ARFNode)child.input.node;
-            GenerateTreeFromRoot(childNode, matrix);
+            GenerateTreeFromRoot(childNode, matrix, newGameObject);
 
         }
     }
 
-    //Since we're manipulating trees, checks if the node has parents, if it doesn't, it's a root
+    //Since we're manipulating trees, this method checks if the node has parents, if it doesn't, it's a root
     private static List<ARFNode> GetRoots(ARFGraphView graphview)
     {
         List<ARFNode> rootList = new();
@@ -143,35 +137,81 @@ public class SceneBuilder : MonoBehaviour
         return visited;
     }
 
-    public static void InstantiateTrackableGO(Trackable trackable, Matrix4x4 transform)
+    public static GameObject InstantiateTrackableGO(Trackable trackable, Matrix4x4 transform, GameObject parent)
     {
-        GameObject prefab = GameObject.Find(trackable.UUID.ToString());
+        GameObject prefab = GameObject.Find(trackable.Name);
         if(prefab == null)
         {
             prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
             GameObject go = (GameObject)PrefabUtility.InstantiatePrefab(prefab as GameObject);
             go.name = trackable.Name;
+            if (parent != null)
+            {
+                go.transform.parent = parent.transform;
+            }
+            foreach (Transform child in go.transform)
+            {
+                child.hideFlags = HideFlags.HideInHierarchy;
+            }
             go.transform.localScale = transform.lossyScale;
             go.transform.rotation = transform.rotation;
             go.transform.position = transform.GetPosition();
             var myComponent = (TrackableScript)go.GetComponent<TrackableScript>();
             myComponent.trackable = trackable;
+            return go;
+        }
+        else
+        {
+            prefab.name = trackable.Name;
+            if (parent != null)
+            {
+                prefab.transform.parent = parent.transform;
+            }
+            prefab.transform.localScale = transform.lossyScale;
+            prefab.transform.rotation = transform.rotation;
+            prefab.transform.position = transform.GetPosition();
+            var myComponent = (TrackableScript)prefab.GetComponent<TrackableScript>();
+            myComponent.trackable = trackable;
+            return prefab;
         }       
     }
 
-    static void InstantiateWorldAnchorGO(WorldAnchor worldAnchor, Matrix4x4 transform)
+    public static GameObject InstantiateWorldAnchorGO(WorldAnchor worldAnchor, Matrix4x4 transform, GameObject parent)
     {
-        GameObject prefab = GameObject.Find(worldAnchor.UUID.ToString());
+        GameObject prefab = GameObject.Find(worldAnchor.Name);
         if (prefab == null)
         {
             prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFWorldAnchor.prefab", typeof(GameObject));
             GameObject go = (GameObject)PrefabUtility.InstantiatePrefab(prefab as GameObject);
             go.name = worldAnchor.Name;
+            if(parent != null)
+            {
+                go.transform.parent = parent.transform;
+            }
+            foreach (Transform child in go.transform)
+            {
+                child.hideFlags = HideFlags.HideInHierarchy;
+            }
             go.transform.localScale = transform.lossyScale;
             go.transform.rotation = transform.rotation;
             go.transform.position = transform.GetPosition();
             var myComponent = (WorldAnchorScript)go.GetComponent<WorldAnchorScript>();
             myComponent.worldAnchor = worldAnchor;
+            return go;
+        }
+        else
+        {
+            prefab.name = worldAnchor.Name;
+            if (parent != null)
+            {
+                prefab.transform.parent = parent.transform;
+            }
+            prefab.transform.localScale = transform.lossyScale;
+            prefab.transform.rotation = transform.rotation;
+            prefab.transform.position = transform.GetPosition();
+            var myComponent = (WorldAnchorScript)prefab.GetComponent<WorldAnchorScript>();
+            myComponent.worldAnchor = worldAnchor;
+            return prefab;
         }
     }
 
@@ -190,7 +230,7 @@ public class SceneBuilder : MonoBehaviour
             Debug.Log("oops");
         }
     }
-     public GameObject GenerateAndUpdateVisual(string UUID, string name, Vector3 pos, Vector3 rot)
+    public GameObject GenerateAndUpdateVisual(string UUID, string name, Vector3 pos, Vector3 rot)
         {
 
             //create the parentgameobject 
@@ -211,4 +251,89 @@ public class SceneBuilder : MonoBehaviour
             visual.transform.Find("Canvas/Text").GetComponent<TextMeshProUGUI>().text = $"Name: { name }\nUUID: { UUID }";
             return visual;
         }
+
+    public static List<GameObject> FindElementsPrefabInstances()
+    {
+        UnityEngine.Object trackablePrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
+        UnityEngine.Object worldAnchorPrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFWorldAnchor.prefab", typeof(GameObject));
+        List<GameObject> result = new List<GameObject>();
+        GameObject[] allObjects = (GameObject[])FindObjectsOfType(typeof(GameObject));
+        foreach (GameObject GO in allObjects)
+        {
+            if (EditorUtility.GetPrefabType(GO) == PrefabType.PrefabInstance)
+            {
+                UnityEngine.Object GO_prefab = EditorUtility.GetPrefabParent(GO);
+                if ((trackablePrefab == GO_prefab)|| (worldAnchorPrefab == GO_prefab))
+                    result.Add(GO);
+            }
+        }
+        return result;
+    }
+    public static List<GameObject> FindElementsPrefabInstancesInChilds(GameObject parent)
+    {
+        UnityEngine.Object trackablePrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
+        UnityEngine.Object worldAnchorPrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFWorldAnchor.prefab", typeof(GameObject));
+        List<GameObject> result = new List<GameObject>(); 
+        foreach (Transform transfrom in parent.transform)
+        {
+            var GO = transfrom.gameObject;
+            if (EditorUtility.GetPrefabType(GO) == PrefabType.PrefabInstance)
+            {
+                UnityEngine.Object GO_prefab = EditorUtility.GetPrefabParent(GO);
+                if ((trackablePrefab == GO_prefab) || (worldAnchorPrefab == GO_prefab))
+                    result.Add(GO);
+            }
+        }
+        return result;
+    }
+
+    public static void DeleteGO(string name)
+    {
+        var toDelete = GameObject.Find(name);
+        DestroyImmediate(toDelete);
+    }
+
+    public static void MoveGO(String parentName, String elemName, Matrix4x4 transform)
+    {
+        //Get both gameObjects from names
+        var parent = GameObject.Find(parentName);
+        var elem = GameObject.Find(elemName);
+        if (elem != null)
+        {
+            if (parent != null)
+            {
+                if (elem.transform.parent != parent.transform)
+                {
+                    elem.transform.parent = parent.transform;
+                }
+
+                //Get the parent position
+                Matrix4x4 parentPos = parent.transform.localToWorldMatrix;
+
+                //Add the transform to the parent position
+                Vector3 position = parentPos.ExtractPosition() + transform.ExtractPosition();
+                Quaternion rotation = parentPos.ExtractRotation() * transform.ExtractRotation();
+                Vector3 scale = Vector3.Scale(parentPos.ExtractScale(), transform.ExtractScale());
+
+                //create the matrix after 
+                var matrix = Matrix4x4.TRS(position, rotation, scale);
+
+                //Move the game object to the new position
+                {
+                    elem.transform.localScale = matrix.lossyScale;
+                    elem.transform.rotation = matrix.rotation;
+                    elem.transform.position = matrix.GetPosition();
+                }
+            }
+            else
+            {
+                //Move the game object to the new position
+                {
+                    elem.transform.localScale = transform.lossyScale;
+                    elem.transform.rotation = transform.rotation;
+                    elem.transform.position = transform.GetPosition();
+                }
+            }
+        }
+    }
 }

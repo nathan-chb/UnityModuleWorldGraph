@@ -174,6 +174,23 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 winSingleton.local_rot = localCRS.rotation.eulerAngles;
             }
         }
+        public void Update()
+        {
+            if (winSingleton.trackableNode != null)
+            {
+                if (trackableNode.title != trackable.Name)
+                {
+                    trackableNode.title = trackable.Name;
+                }
+            }
+            else if (winSingleton.worldAnchorNode != null)
+            {
+                if (worldAnchorNode.title != worldAnchor.Name)
+                {
+                    worldAnchorNode.title = worldAnchor.Name;
+                }
+            }
+        }
 
         public void OnGUI()
         {
@@ -511,6 +528,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         }
                         worldAnchorNode.worldAnchor.UUID = Guid.Parse(uuid);
                         worldAnchorNode.GUID = uuid;
+                        worldAnchorNode.viewDataKey = worldAnchorNode.GUID;
                         worldAnchorNode.title = worldAnchor.Name;
 
                         //Add the newly saved World Anchor to the SaveInfo singleton
@@ -947,6 +965,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         }
                         trackableNode.trackable.UUID = Guid.Parse(uuid);
                         trackableNode.GUID = uuid;
+                        trackableNode.viewDataKey = trackableNode.GUID;
                         trackableNode.title = trackable.Name;
 
                         //Add the newly saved Trackable to the SaveInfo singleton
@@ -1124,6 +1143,11 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         UtilGraphSingleton.instance.elemsToUpdate.Add(worldLink.UUID.ToString());
                     }
                     worldLinkEdge.MarkUnsaved();
+
+                    //update scene
+                    String parentName = worldLinkEdge.output.node.title;
+                    String elemName = worldLinkEdge.input.node.title;
+                    SceneBuilder.MoveGO(parentName, elemName, localCRS);
                 }
 
                 //
@@ -1192,6 +1216,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                             uuid = uuid.Replace("\"", "");
                             worldLink.UUID = Guid.Parse(uuid);
                             worldLinkEdge.GUID = uuid;
+                            worldLinkEdge.viewDataKey = worldLinkEdge.GUID;
                             UtilGraphSingleton.instance.linkIds.Add(uuid);
                         }
                         worldLinkEdge.MarkSaved();

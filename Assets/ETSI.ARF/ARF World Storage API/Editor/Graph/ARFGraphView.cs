@@ -84,28 +84,55 @@ namespace ETSI.ARF.WorldStorage.UI
                     ARFNodeWorldAnchor nodeAnchor = elt as ARFNodeWorldAnchor;
                     if (nodeAnchor != null)
                     {
+                        //move the son in the hierarchy and move it in the sceneGraph
+                        var elem = GameObject.Find(nodeAnchor.title);
+
+                        //get childs (prefab instances)
+                        var childs = SceneBuilder.FindElementsPrefabInstancesInChilds(elem);
+                        foreach (GameObject child in childs)
+                        {
+                            child.transform.parent = null;
+                        }
+
                         nodeAnchor.DisconnectAllPorts(this);
                         if (UtilGraphSingleton.instance.nodePositions.ContainsKey(nodeAnchor.GUID))
                         {
                             UtilGraphSingleton.instance.elemsToRemove.Add(nodeAnchor.GUID, typeof(WorldAnchor));
                         }
                         RemoveElement(elt);
+                        SceneBuilder.DeleteGO(nodeAnchor.title);
                         continue;
                     }
                     ARFNodeTrackable nodeTrackable = elt as ARFNodeTrackable;
                     if (nodeTrackable != null)
                     {
+                        //move the son in the hierarchy and move it in the sceneGraph
+                        var elem = GameObject.Find(nodeTrackable.title);
+
+                        //get childs (prefab instances)
+                        var childs = SceneBuilder.FindElementsPrefabInstancesInChilds(elem);
+                        foreach (GameObject child in childs)
+                        {
+                            child.transform.parent = null;
+                        }
+
                         nodeTrackable.DisconnectAllPorts(this);
                         if (UtilGraphSingleton.instance.nodePositions.ContainsKey(nodeTrackable.GUID))
                         {
                             UtilGraphSingleton.instance.elemsToRemove.Add(nodeTrackable.GUID, typeof(Trackable));
                         }
                         RemoveElement(elt);
+                        SceneBuilder.DeleteGO(nodeTrackable.title);
                         continue;
                     }
                     ARFEdgeLink edgeLink = elt as ARFEdgeLink;
                     if (edgeLink != null)
                     {
+                        //move the son in the hierarchy and move it in the sceneGraph
+                        var elem = GameObject.Find(edgeLink.input.node.title);
+                        elem.transform.parent = null;
+                        SceneBuilder.MoveGO(null, elem.name, Matrix4x4.identity);
+
                         edgeLink.input.Disconnect(edgeLink);
                         edgeLink.output.Disconnect(edgeLink);
                         if (UtilGraphSingleton.instance.linkIds.Contains(edgeLink.GUID))
@@ -113,6 +140,7 @@ namespace ETSI.ARF.WorldStorage.UI
                             UtilGraphSingleton.instance.elemsToRemove.Add(edgeLink.GUID, typeof(WorldLink));
                         }
                         RemoveElement(elt);
+
                         continue;
                     }
                 }
@@ -197,6 +225,9 @@ namespace ETSI.ARF.WorldStorage.UI
                     node.MarkUnsaved();
                     GraphEditorWindow.ShowWindow((ARFNodeTrackable)node);
 
+                    //create the GameObject
+                    SceneBuilder.InstantiateTrackableGO(trackable, Matrix4x4.identity, null);
+
                 }, (DropdownMenuAction a) => DropdownMenuAction.Status.Normal);
                 evt.menu.AppendAction("Create World Anchor", delegate
                 {
@@ -247,6 +278,9 @@ namespace ETSI.ARF.WorldStorage.UI
                     var node = CreateAnchorNode(anchor, actualGraphPosition.x, actualGraphPosition.y);
                     node.MarkUnsaved();
                     GraphEditorWindow.ShowWindow((ARFNodeWorldAnchor)node);
+
+                    //create the GameObject
+                    SceneBuilder.InstantiateWorldAnchorGO(anchor, Matrix4x4.identity, null);
 
                 }, (DropdownMenuAction a) => DropdownMenuAction.Status.Normal);
             }
@@ -339,10 +373,12 @@ namespace ETSI.ARF.WorldStorage.UI
                 ARFEdgeLink edge = portPair.Key.ConnectTo<ARFEdgeLink>(portPair.Value);
                 edge.worldLink = worldLink;
                 edge.GUID = worldLink.UUID.ToString();
+                edge.viewDataKey = edge.GUID;
 
                 AddElement(edge);
             }
 
+            SceneBuilder.InstantiateGraph(this);
         }
 
         internal ARFNodeTrackable CreateTrackableNode(Trackable track, float posX, float posY)
@@ -373,6 +409,7 @@ namespace ETSI.ARF.WorldStorage.UI
             edge.worldLink = worldLink;
             Debug.Log(worldLink.UUID.ToString());
             edge.GUID = worldLink.UUID.ToString();
+            edge.viewDataKey = edge.GUID;
 
             AddElement(edge);
             return edge;
@@ -577,6 +614,7 @@ namespace ETSI.ARF.WorldStorage.UI
                         }
                         aRFNodeTrackable.trackable.UUID = Guid.Parse(uuid);
                         aRFNodeTrackable.GUID = uuid;
+                        aRFNodeTrackable.viewDataKey = aRFNodeTrackable.GUID;
                         aRFNodeTrackable.title = trackable.Name;
                     }
                     //POST WORLDANCHOR
@@ -604,6 +642,7 @@ namespace ETSI.ARF.WorldStorage.UI
                         }
                         aRFNodeWorldAnchor.worldAnchor.UUID = Guid.Parse(uuid);
                         aRFNodeWorldAnchor.GUID = uuid;
+                        aRFNodeWorldAnchor.viewDataKey = aRFNodeWorldAnchor.GUID;
                         aRFNodeWorldAnchor.title = worldAnchor.Name;
                     }
                 }
@@ -655,6 +694,7 @@ namespace ETSI.ARF.WorldStorage.UI
 
                         aRFEdgeLink.worldLink.UUID = Guid.Parse(uuid);
                         aRFEdgeLink.GUID = uuid;
+                        aRFEdgeLink.viewDataKey = aRFEdgeLink.GUID;
                     }
                     else if (UtilGraphSingleton.instance.elemsToUpdate.Contains(aRFEdgeLink.GUID))
                     {

@@ -42,6 +42,7 @@ namespace ETSI.ARF.WorldStorage.UI
         {
             this.worldAnchor = worldAnchor;
             this.GUID = worldAnchor.UUID.ToString();
+            this.viewDataKey = GUID;
             this.title = worldAnchor.Name;
 
             /*COLOR*/

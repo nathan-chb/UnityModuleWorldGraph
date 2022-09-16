@@ -18,7 +18,13 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Name : ");
-            EditorGUILayout.LabelField(((WorldAnchorScript)target).worldAnchor.Name);
+            EditorGUI.BeginChangeCheck();
+            ((WorldAnchorScript)target).worldAnchor.Name = EditorGUILayout.DelayedTextField(((WorldAnchorScript)target).worldAnchor.Name);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ((WorldAnchorScript)target).name = ((WorldAnchorScript)target).worldAnchor.Name;
+                WorldGraphWindow.RenameNode(((WorldAnchorScript)target).name, ((WorldAnchorScript)target).worldAnchor.UUID.ToString());
+            }
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();

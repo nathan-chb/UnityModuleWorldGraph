@@ -18,9 +18,14 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Name : ");
-            EditorGUILayout.LabelField(((TrackableScript)target).trackable.Name);
+            EditorGUI.BeginChangeCheck();
+            ((TrackableScript)target).trackable.Name = EditorGUILayout.DelayedTextField(((TrackableScript)target).trackable.Name);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ((TrackableScript)target).name = ((TrackableScript)target).trackable.Name;
+                WorldGraphWindow.RenameNode(((TrackableScript)target).name, ((TrackableScript)target).trackable.UUID.ToString());
+            }
             EditorGUILayout.EndHorizontal();
-
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("UUID : ");
             if (UtilGraphSingleton.instance.nodePositions.ContainsKey(((TrackableScript)target).trackable.UUID.ToString()))

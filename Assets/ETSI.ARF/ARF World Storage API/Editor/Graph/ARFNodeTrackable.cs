@@ -43,6 +43,7 @@ namespace ETSI.ARF.WorldStorage.UI
         {
             this.trackable = trackable;
             this.GUID = trackable.UUID.ToString();
+            this.viewDataKey = GUID;
             this.title = trackable.Name;
 
             /*COLOR*/
@@ -79,7 +80,7 @@ namespace ETSI.ARF.WorldStorage.UI
 
         public void Clicked()
         {
-            Debug.Log(trackable.ToJson());
+            Debug.Log(viewDataKey);
             GraphEditorWindow.ShowWindow(this);
         }
         public override ObjectType GetElemType()

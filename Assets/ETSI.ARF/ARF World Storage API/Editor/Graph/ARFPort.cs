@@ -63,6 +63,13 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
 
                 WorldLink worldLink = new(Guid.NewGuid(), Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), Guid.Parse(fromNode.GUID), Guid.Parse(toNode.GUID), fromNode.GetElemType(), toNode.GetElemType(), transform, UnitSystem.CM, new Dictionary<string, List<string>>());
                 aRFedge.worldLink = worldLink;
+                aRFedge.GUID = worldLink.UUID.ToString();
+                aRFedge.viewDataKey = worldLink.UUID.ToString();
+
+                //update scene
+                String parentName = aRFedge.output.node.title;
+                String elemName = aRFedge.input.node.title;
+                SceneBuilder.MoveGO(parentName, elemName, Matrix4x4.identity);
             }
         }
 

@@ -178,33 +178,24 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 }
             }
 
-            if(GUILayout.Button("generateGraph :clown_emoji:"))
+            if(GUILayout.Button("Debug Generate Grap^h"))
             {
                 SceneBuilder.InstantiateGraph(myGraph);
             }
         }
 
-        public void DeleteNode(ARFNode node)
+        public static void RenameNode(String name, String guid)
         {
-            rootVisualElement.Remove(myGraph);
-            node.DisconnectAllPorts(myGraph);
-            myGraph.DeleteElements(new List<GraphElement>{ node });
-            rootVisualElement.Add(myGraph);
-        }
-
-        public void DeleteEdge(ARFEdgeLink edge)
-        {
-            rootVisualElement.Remove(myGraph);
-            myGraph.DeleteElements(new List<GraphElement> { edge });
-            rootVisualElement.Add(myGraph);
-        }
-
-        public static void RenameNode(String name, ARFNode node)
-        {
-            var window = WorldGraphWindow.GetWindow<WorldGraphWindow>("Graph Editor", true, typeof(SceneView));
+            var window = WorldGraphWindow.GetWindow<WorldGraphWindow>("Graph Editor", false, typeof(SceneView));
             var graph = window.myGraph;
 
-            graph.GetNodeByGuid(node.GUID).title = name;
+            graph.GetNodeByGuid(guid).title = name;
+
+            if (UtilGraphSingleton.instance.nodePositions.ContainsKey(guid) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(guid)))
+            {
+                UtilGraphSingleton.instance.elemsToUpdate.Add(guid);
+            }
+            ((ARFNode)graph.GetNodeByGuid(guid)).MarkUnsaved();
         }
     }
 }

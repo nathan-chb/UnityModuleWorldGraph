@@ -106,11 +106,8 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             Debug.Log("elems tout court : " + string.Join(", ", instance.nodePositions.Keys));
         }
 
-        public static void SynchronizeWithGameObjects()
+        public static void SynchronizeWithGameObjects(ARFGraphView graph)
         {
-            //get the graph currently in the window
-            var window = WorldGraphWindow.Instance;
-            ARFGraphView graph = window.GetGraph();
 
             //loop all corresponding go
             foreach (var gameObject in SceneBuilder.FindElementsPrefabInstances())
@@ -145,8 +142,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     throw (new Exception("no script in this gameObject"));
                 }
             }
-            //check if modified
-            //add the ink's id to elem to update if they are
         }
     }
 }

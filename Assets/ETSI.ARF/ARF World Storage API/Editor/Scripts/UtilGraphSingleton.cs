@@ -18,8 +18,11 @@
 // Last change: July 2022
 //
 
+using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph;
+using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 using ETSI.ARF.WorldStorage;
 using ETSI.ARF.WorldStorage.REST;
+using ETSI.ARF.WorldStorage.UI;
 using Org.OpenAPITools.Model;
 using System;
 using System.Collections.Generic;
@@ -101,6 +104,49 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             Debug.Log("elems to delete : " + string.Join(", ", instance.elemsToRemove.Keys));
             Debug.Log("elems to update : " + string.Join(", ", instance.elemsToUpdate));
             Debug.Log("elems tout court : " + string.Join(", ", instance.nodePositions.Keys));
+        }
+
+        public static void SynchronizeWithGameObjects()
+        {
+            //get the graph currently in the window
+            var window = WorldGraphWindow.Instance;
+            ARFGraphView graph = window.GetGraph();
+
+            //loop all corresponding go
+            foreach (var gameObject in SceneBuilder.FindElementsPrefabInstances())
+            {
+                //check on the script of the game obejct (either trackable or worldanchor)
+                var trackableScript = (TrackableScript)gameObject.GetComponent<TrackableScript>();
+                var worldAnchorScript = (WorldAnchorScript)gameObject.GetComponent<WorldAnchorScript>();
+                if (trackableScript != null)
+                {
+                    //if it's modified, mark it as unsafe
+                    if ((trackableScript.modified == true) && (trackableScript.link != null)){
+                        UtilGraphSingleton.instance.elemsToUpdate.Add(trackableScript.link.UUID.ToString());
+
+                        //get the corresponding edge
+                        var edge = graph.GetEdgeByGuid(trackableScript.link.UUID.ToString());
+                        ((ARFEdgeLink)edge).MarkUnsaved();
+                    }
+                }
+                else if(worldAnchorScript != null)
+                {
+                    if ((worldAnchorScript.modified == true) && (worldAnchorScript.link != null))
+                    {
+                        UtilGraphSingleton.instance.elemsToUpdate.Add(worldAnchorScript.link.UUID.ToString());
+
+                        //get the corresponding edge
+                        var edge = graph.GetEdgeByGuid(worldAnchorScript.link.UUID.ToString());
+                        ((ARFEdgeLink)edge).MarkUnsaved();
+                    }
+                }
+                else
+                {
+                    throw (new Exception("no script in this gameObject"));
+                }
+            }
+            //check if modified
+            //add the ink's id to elem to update if they are
         }
     }
 }

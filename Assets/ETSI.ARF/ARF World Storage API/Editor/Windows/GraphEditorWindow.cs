@@ -24,6 +24,7 @@ using ETSI.ARF.WorldStorage.UI;
 using Org.OpenAPITools.Model;
 using System;
 using System.Collections.Generic;
+using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 using UnityEditor;
 using UnityEngine;
 
@@ -102,7 +103,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             winSingleton.trackableNode = trackableNode;
             winSingleton.trackable = trackableNode.trackable;
 
-            winSingleton.local_size = new Vector3((float)winSingleton.trackable.TrackableSize[0], (float)winSingleton.trackable.TrackableSize[1], (float)winSingleton.trackable.TrackableSize[2]);
             if (winSingleton.trackable.LocalCRS.Count == 16)
             {
                 Matrix4x4 localCRS = new Matrix4x4();
@@ -113,7 +113,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 winSingleton.local_pos = localCRS.GetPosition();
                 winSingleton.local_rot = localCRS.rotation.eulerAngles;
             }
-
         }
 
         public static void ShowWindow(ARFNodeWorldAnchor worldAnchorNode)
@@ -133,7 +132,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             winSingleton.worldAnchorNode = worldAnchorNode;
             winSingleton.worldAnchor = worldAnchorNode.worldAnchor;
 
-            winSingleton.local_size = new Vector3((float)winSingleton.worldAnchor.WorldAnchorSize[0], (float)winSingleton.worldAnchor.WorldAnchorSize[1], (float)winSingleton.worldAnchor.WorldAnchorSize[2]);
             if (winSingleton.worldAnchor.LocalCRS.Count == 16)
             {
                 Matrix4x4 localCRS = new Matrix4x4();
@@ -174,6 +172,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 winSingleton.local_rot = localCRS.rotation.eulerAngles;
             }
         }
+
         public void Update()
         {
             if (winSingleton.trackableNode != null)
@@ -189,6 +188,10 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 {
                     worldAnchorNode.title = worldAnchor.Name;
                 }
+            }
+            else if (winSingleton.worldLinkEdge != null)
+            {
+
             }
         }
 
@@ -225,7 +228,30 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         //BUILD UI FOR MODIYING THE WORLDANCHOR
         private void BuildWorldAnchorUI()
         {
-            if(worldAnchor != null) {
+            if (worldAnchor != null)
+            {
+
+                winSingleton.local_size = new Vector3((float)winSingleton.worldAnchor.WorldAnchorSize[0], (float)winSingleton.worldAnchor.WorldAnchorSize[1], (float)winSingleton.worldAnchor.WorldAnchorSize[2]);
+                if (winSingleton.worldAnchor.LocalCRS.Count == 16)
+                {
+                    Matrix4x4 localCRS = new Matrix4x4();
+                    localCRS.m00 = winSingleton.worldAnchor.LocalCRS[0]; localCRS.m01 = winSingleton.worldAnchor.LocalCRS[1]; localCRS.m02 = winSingleton.worldAnchor.LocalCRS[2]; localCRS.m03 = winSingleton.worldAnchor.LocalCRS[3];
+                    localCRS.m10 = winSingleton.worldAnchor.LocalCRS[4]; localCRS.m11 = winSingleton.worldAnchor.LocalCRS[5]; localCRS.m12 = winSingleton.worldAnchor.LocalCRS[6]; localCRS.m13 = winSingleton.worldAnchor.LocalCRS[7];
+                    localCRS.m20 = winSingleton.worldAnchor.LocalCRS[8]; localCRS.m21 = winSingleton.worldAnchor.LocalCRS[9]; localCRS.m22 = winSingleton.worldAnchor.LocalCRS[10]; localCRS.m23 = winSingleton.worldAnchor.LocalCRS[11];
+                    localCRS.m30 = winSingleton.worldAnchor.LocalCRS[12]; localCRS.m31 = winSingleton.worldAnchor.LocalCRS[13]; localCRS.m32 = winSingleton.worldAnchor.LocalCRS[14]; localCRS.m33 = winSingleton.worldAnchor.LocalCRS[15];
+                    if ((winSingleton.local_pos != localCRS.GetPosition()) || (winSingleton.local_rot != localCRS.rotation.eulerAngles))
+                    {
+                        winSingleton.local_pos = localCRS.GetPosition();
+                        winSingleton.local_rot = localCRS.rotation.eulerAngles;
+
+
+                        if (UtilGraphSingleton.instance.nodePositions.ContainsKey(worldAnchor.UUID.ToString()) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(worldAnchor.UUID.ToString())))
+                        {
+                            UtilGraphSingleton.instance.elemsToUpdate.Add(worldAnchor.UUID.ToString());
+                        }
+                        worldAnchorNode.MarkUnsaved();
+                    }
+                }
 
                 //
                 //HEADER
@@ -285,9 +311,16 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 EditorGUILayout.BeginHorizontal();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.LabelField("Name ", EditorStyles.boldLabel, GUILayout.Width(50));
+                var oldName = worldAnchor.Name.ToString();
                 worldAnchor.Name = EditorGUILayout.DelayedTextField(worldAnchor.Name);
                 if (EditorGUI.EndChangeCheck())
                 {
+                    //change the name of the GO
+                    GameObject waGO = GameObject.Find(oldName);
+                    if (waGO != null)
+                    {
+                        waGO.name = worldAnchor.Name;
+                    }
                     worldAnchorNode.title = worldAnchor.Name;
                 }
                 EditorGUILayout.EndHorizontal();
@@ -463,18 +496,44 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     {
                         if (UtilGraphSingleton.instance.elemsToUpdate.Contains(worldAnchor.UUID.ToString()) && EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
                         {
+                            var gameObject = GameObject.Find(worldAnchor.Name);
+
                             worldAnchor = WorldAnchorRequest.GetWorldAnchor(UtilGraphSingleton.instance.worldStorageServer, worldAnchor.UUID.ToString());
                             worldAnchorNode.worldAnchor = worldAnchor;
                             ShowWindow(worldAnchorNode);
+
+                            //Update the gameobject component and the name
+                            if (gameObject != null)
+                            {
+                                gameObject.name = worldAnchor.Name;
+                                var worldAnchorScript = (WorldAnchorScript)gameObject.GetComponent<WorldAnchorScript>();
+                                worldAnchorScript.worldAnchor = worldAnchor;
+                            }
+
+                            UtilGraphSingleton.instance.elemsToUpdate.Remove(worldAnchor.UUID.ToString());
+                            worldAnchorNode.MarkSaved();
                         }
                     }
                     else
                     {
                         if (EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
                         {
+                            var gameObject = GameObject.Find(worldAnchorNode.worldAnchor.Name);
+
                             //generate the worldAnchor attributes
-                            List<float> localCRS = new List<float>();
-                            for (int i = 0; i < 15; i++)
+                            List<float> localCRS = new();
+                            localCRS.Add(1);
+                            for (int i = 1; i < 5; i++)
+                            {
+                                localCRS.Add(0);
+                            }
+                            localCRS.Add(1);
+                            for (int i = 6; i < 10; i++)
+                            {
+                                localCRS.Add(0);
+                            }
+                            localCRS.Add(1);
+                            for (int i = 11; i < 15; i++)
                             {
                                 localCRS.Add(0);
                             }
@@ -487,6 +546,15 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                             }
                             worldAnchor = new WorldAnchor(Guid.NewGuid(), "DefaultWorldAnchor", Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), localCRS, UnitSystem.CM, worldAnchorSize, new Dictionary<string, List<string>>());
                             worldAnchorNode.worldAnchor = worldAnchor;
+
+                            //Update the gameobject component and the name
+                            if (gameObject != null)
+                            {
+                                gameObject.name = worldAnchor.Name;
+                                var worldAnchorScript = (WorldAnchorScript)gameObject.GetComponent<WorldAnchorScript>();
+                                worldAnchorScript.worldAnchor = worldAnchor;
+                            }
+
                             ShowWindow(worldAnchorNode);
                         }
                     }
@@ -551,6 +619,26 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         {
             if (trackable != null)
             {
+
+                winSingleton.local_size = new Vector3((float)winSingleton.trackable.TrackableSize[0], (float)winSingleton.trackable.TrackableSize[1], (float)winSingleton.trackable.TrackableSize[2]);
+                if (winSingleton.trackable.LocalCRS.Count == 16)
+                {
+                    Matrix4x4 localCRS = new Matrix4x4();
+                    localCRS.m00 = winSingleton.trackable.LocalCRS[0]; localCRS.m01 = winSingleton.trackable.LocalCRS[1]; localCRS.m02 = winSingleton.trackable.LocalCRS[2]; localCRS.m03 = winSingleton.trackable.LocalCRS[3];
+                    localCRS.m10 = winSingleton.trackable.LocalCRS[4]; localCRS.m11 = winSingleton.trackable.LocalCRS[5]; localCRS.m12 = winSingleton.trackable.LocalCRS[6]; localCRS.m13 = winSingleton.trackable.LocalCRS[7];
+                    localCRS.m20 = winSingleton.trackable.LocalCRS[8]; localCRS.m21 = winSingleton.trackable.LocalCRS[9]; localCRS.m22 = winSingleton.trackable.LocalCRS[10]; localCRS.m23 = winSingleton.trackable.LocalCRS[11];
+                    localCRS.m30 = winSingleton.trackable.LocalCRS[12]; localCRS.m31 = winSingleton.trackable.LocalCRS[13]; localCRS.m32 = winSingleton.trackable.LocalCRS[14]; localCRS.m33 = winSingleton.trackable.LocalCRS[15];
+                    if((winSingleton.local_pos != localCRS.GetPosition()) || (winSingleton.local_rot != localCRS.rotation.eulerAngles))
+                    {
+                        winSingleton.local_pos = localCRS.GetPosition();
+                        winSingleton.local_rot = localCRS.rotation.eulerAngles;
+                        if (UtilGraphSingleton.instance.nodePositions.ContainsKey(trackable.UUID.ToString()) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(trackable.UUID.ToString())))
+                        {
+                            UtilGraphSingleton.instance.elemsToUpdate.Add(trackable.UUID.ToString());
+                        }
+                        trackableNode.MarkUnsaved();
+                    }
+                }
 
                 //
                 //HEADER
@@ -898,20 +986,47 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     {
                         if (UtilGraphSingleton.instance.elemsToUpdate.Contains(trackable.UUID.ToString()) && EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
                         {
+                            var gameObject = GameObject.Find(trackable.Name);
+
                             trackable = TrackableRequest.GetTrackable(UtilGraphSingleton.instance.worldStorageServer, trackable.UUID.ToString());
                             trackableNode.trackable = trackable;
+
+                            UtilGraphSingleton.instance.elemsToUpdate.Remove(trackable.UUID.ToString());
+                            trackableNode.MarkSaved();
+
                             ShowWindow(trackableNode);
+
+                            //update the gameobject component and name
+                            if (gameObject != null)
+                            {
+                                gameObject.name = trackable.Name;
+                                var trackableScript = (TrackableScript)gameObject.GetComponent<TrackableScript>();
+                                trackableScript.trackable = trackable;
+                            }
                         }
                     }
                     else
                     {
                         if (EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
                         {
+                            var gameObject = GameObject.Find(trackableNode.trackable.Name);
+
                             //generate the Trackables's attributes
                             EncodingInformationStructure trackableEncodingInformation = new EncodingInformationStructure(EncodingInformationStructure.DataFormatEnum.OTHER, "0");
 
                             List<float> localCRS = new();
-                            for (int i = 0; i < 15; i++)
+                            localCRS.Add(1);
+                            for (int i = 1; i < 5; i++)
+                            {
+                                localCRS.Add(0);
+                            }
+                            localCRS.Add(1);
+                            for (int i = 6; i < 10; i++)
+                            {
+                                localCRS.Add(0);
+                            }
+                            localCRS.Add(1);
+                            for (int i = 11; i < 15; i++)
                             {
                                 localCRS.Add(0);
                             }
@@ -923,11 +1038,23 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                                 trackableSize.Add(0);
                             }
 
-                            Trackable trackable = new Trackable(Guid.NewGuid(), "Defaulttrackable", Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), Trackable.TrackableTypeEnum.OTHER, trackableEncodingInformation, new byte[64], localCRS, UnitSystem.CM, trackableSize, new Dictionary<string, List<string>>());
+                            Trackable trackable = new Trackable(Guid.NewGuid(), "DefaultTrackable", Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), Trackable.TrackableTypeEnum.OTHER, trackableEncodingInformation, new byte[64], localCRS, UnitSystem.CM, trackableSize, new Dictionary<string, List<string>>());
                             trackableNode.trackable = trackable;
+
+                            //update the gameobject component and name
+                            if (gameObject != null)
+                            {
+                                gameObject.name = trackable.Name;
+                                var trackableScript = (TrackableScript)gameObject.GetComponent<TrackableScript>();
+                                trackableScript.trackable = trackable;
+                            }
+
                             ShowWindow(trackableNode);
                         }
                     }
+
+                    //reset the Element's position in the game scene
+
                 }
 
                 //save button
@@ -988,6 +1115,27 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         {
             if (worldLink != null)
             {
+                //get the changes from the scene
+                if (winSingleton.worldLink.Transform.Count == 16)
+                {
+                    Matrix4x4 localCRS = new Matrix4x4();
+                    localCRS.m00 = winSingleton.worldLink.Transform[0]; localCRS.m01 = winSingleton.worldLink.Transform[1]; localCRS.m02 = winSingleton.worldLink.Transform[2]; localCRS.m03 = winSingleton.worldLink.Transform[3];
+                    localCRS.m10 = winSingleton.worldLink.Transform[4]; localCRS.m11 = winSingleton.worldLink.Transform[5]; localCRS.m12 = winSingleton.worldLink.Transform[6]; localCRS.m13 = winSingleton.worldLink.Transform[7];
+                    localCRS.m20 = winSingleton.worldLink.Transform[8]; localCRS.m21 = winSingleton.worldLink.Transform[9]; localCRS.m22 = winSingleton.worldLink.Transform[10]; localCRS.m23 = winSingleton.worldLink.Transform[11];
+                    localCRS.m30 = winSingleton.worldLink.Transform[12]; localCRS.m31 = winSingleton.worldLink.Transform[13]; localCRS.m32 = winSingleton.worldLink.Transform[14]; localCRS.m33 = winSingleton.worldLink.Transform[15];
+                    if ((winSingleton.local_pos != localCRS.GetPosition()) || (winSingleton.local_rot != localCRS.rotation.eulerAngles))
+                    {
+                        winSingleton.local_pos = localCRS.GetPosition();
+                        winSingleton.local_rot = localCRS.rotation.eulerAngles;
+                        if (UtilGraphSingleton.instance.linkIds.Contains(worldLink.UUID.ToString()) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(worldLink.UUID.ToString())))
+                        {
+                            UtilGraphSingleton.instance.elemsToUpdate.Add(worldLink.UUID.ToString());
+                        }
+                        worldLinkEdge.MarkUnsaved();
+                    }
+                }
+
+
                 //
                 //HEADER
                 //
@@ -1171,7 +1319,22 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         {
                             worldLink = WorldLinkRequest.GetWorldLink(UtilGraphSingleton.instance.worldStorageServer, worldLink.UUID.ToString());
                             worldLinkEdge.worldLink = worldLink;
+
+                            UtilGraphSingleton.instance.elemsToUpdate.Remove(worldLink.UUID.ToString());
+                            worldLinkEdge.MarkSaved();
+
                             ShowWindow(worldLinkEdge);
+
+                            //update the scene
+                            String parentName = worldLinkEdge.output.node.title;
+                            String elemName = worldLinkEdge.input.node.title;
+                            var localCrsAsList = worldLinkEdge.worldLink.Transform;
+                            Matrix4x4 localCRS = new Matrix4x4();
+                            localCRS.m00 = localCrsAsList[0]; localCRS.m01 = localCrsAsList[1]; localCRS.m02 = localCrsAsList[2]; localCRS.m03 = localCrsAsList[3];
+                            localCRS.m10 = localCrsAsList[4]; localCRS.m11 = localCrsAsList[5]; localCRS.m12 = localCrsAsList[6]; localCRS.m13 = localCrsAsList[7];
+                            localCRS.m20 = localCrsAsList[8]; localCRS.m21 = localCrsAsList[9]; localCRS.m22 = localCrsAsList[10]; localCRS.m23 = localCrsAsList[11];
+                            localCRS.m30 = localCrsAsList[12]; localCRS.m31 = localCrsAsList[13]; localCRS.m32 = localCrsAsList[14]; localCRS.m33 = localCrsAsList[15];
+                            SceneBuilder.MoveGO(parentName, elemName, localCRS);
                         }
                     }
                     else
@@ -1179,8 +1342,19 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         if (EditorUtility.DisplayDialog("Reset elements", "Are you sure you want to lose all your changes ?", "Yes", "No"))
                         {
 
-                            List<float> transform = new List<float>();
-                            for (int i = 0; i < 15; i++)
+                            List<float> transform = new();
+                            transform.Add(1);
+                            for (int i = 1; i < 5; i++)
+                            {
+                                transform.Add(0);
+                            }
+                            transform.Add(1);
+                            for (int i = 6; i < 10; i++)
+                            {
+                                transform.Add(0);
+                            }
+                            transform.Add(1);
+                            for (int i = 11; i < 15; i++)
                             {
                                 transform.Add(0);
                             }
@@ -1188,7 +1362,19 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
 
                             worldLink.Transform = transform;
                             worldLink.Unit = UnitSystem.CM;
+
                             ShowWindow(worldLinkEdge);
+
+                            //update the scene
+                            String parentName = worldLinkEdge.output.node.title;
+                            String elemName = worldLinkEdge.input.node.title;
+                            var localCrsAsList = worldLinkEdge.worldLink.Transform;
+                            Matrix4x4 localCRS = new Matrix4x4();
+                            localCRS.m00 = localCrsAsList[0]; localCRS.m01 = localCrsAsList[1]; localCRS.m02 = localCrsAsList[2]; localCRS.m03 = localCrsAsList[3];
+                            localCRS.m10 = localCrsAsList[4]; localCRS.m11 = localCrsAsList[5]; localCRS.m12 = localCrsAsList[6]; localCRS.m13 = localCrsAsList[7];
+                            localCRS.m20 = localCrsAsList[8]; localCRS.m21 = localCrsAsList[9]; localCRS.m22 = localCrsAsList[10]; localCRS.m23 = localCrsAsList[11];
+                            localCRS.m30 = localCrsAsList[12]; localCRS.m31 = localCrsAsList[13]; localCRS.m32 = localCrsAsList[14]; localCRS.m33 = localCrsAsList[15];
+                            SceneBuilder.MoveGO(parentName, elemName, localCRS);
                         }
                     }
                 }

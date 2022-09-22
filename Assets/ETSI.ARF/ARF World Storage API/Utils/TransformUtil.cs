@@ -1,8 +1,10 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts
-{    public static class TransformExtensions
+{
+    public static class TransformExtensions
     {
         public static void FromMatrix(this Transform transform, Matrix4x4 matrix)
         {
@@ -45,6 +47,18 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts
             scale.y = new Vector4(matrix.m01, matrix.m11, matrix.m21, matrix.m31).magnitude;
             scale.z = new Vector4(matrix.m02, matrix.m12, matrix.m22, matrix.m32).magnitude;
             return scale;
+        }
+        public static List<float> ExtractList(this Matrix4x4 matrix)
+        {
+            var list = new List<float>();
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    list.Add(matrix[i, j]);
+                }
+            }
+            return list;
         }
     }
 }

@@ -36,6 +36,7 @@ using ETSI.ARF.WorldStorage.REST;
 using UnityEditor;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
 using System.Linq;
+using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 
 namespace ETSI.ARF.WorldStorage.UI
 {
@@ -89,6 +90,7 @@ namespace ETSI.ARF.WorldStorage.UI
 
                         //get childs (prefab instances)
                         var childs = SceneBuilder.FindElementsPrefabInstancesInChilds(elem);
+                        //put them at the top of the hierarchy (they don't have parents anymore)
                         foreach (GameObject child in childs)
                         {
                             child.transform.parent = null;
@@ -226,7 +228,7 @@ namespace ETSI.ARF.WorldStorage.UI
                     GraphEditorWindow.ShowWindow((ARFNodeTrackable)node);
 
                     //create the GameObject
-                    SceneBuilder.InstantiateTrackableGO(trackable, Matrix4x4.identity, null);
+                    SceneBuilder.InstantiateTrackableGO(trackable, null, Matrix4x4.identity, null);
 
                 }, (DropdownMenuAction a) => DropdownMenuAction.Status.Normal);
                 evt.menu.AppendAction("Create World Anchor", delegate
@@ -280,7 +282,7 @@ namespace ETSI.ARF.WorldStorage.UI
                     GraphEditorWindow.ShowWindow((ARFNodeWorldAnchor)node);
 
                     //create the GameObject
-                    SceneBuilder.InstantiateWorldAnchorGO(anchor, Matrix4x4.identity, null);
+                    SceneBuilder.InstantiateWorldAnchorGO(anchor, null, Matrix4x4.identity, null);
 
                 }, (DropdownMenuAction a) => DropdownMenuAction.Status.Normal);
             }

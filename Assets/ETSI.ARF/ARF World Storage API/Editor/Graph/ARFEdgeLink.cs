@@ -19,6 +19,7 @@
 //
 
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
+using ETSI.ARF.WorldStorage.UI;
 using Org.OpenAPITools.Model;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -33,6 +34,9 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
         public string GUID;
 
         public Image savedIcon;
+
+        //used when the edge input destination is changed
+        public ARFNode originalDestinationNode;
 
         public ARFEdgeLink()
         {
@@ -77,6 +81,10 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
             {
                 edgeControl.Remove(savedIcon);
                 tooltip = "";
+            }
+            if (UtilGraphSingleton.instance.elemsToUpdate.Contains(GUID))
+            {
+                UtilGraphSingleton.instance.elemsToUpdate.Remove(GUID);
             }
         }
     }

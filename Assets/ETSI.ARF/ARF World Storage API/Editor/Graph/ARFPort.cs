@@ -19,6 +19,7 @@
 //
 
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
+using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 using ETSI.ARF.WorldStorage.UI;
 using Org.OpenAPITools.Model;
 using System;
@@ -43,35 +44,71 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
 
             if (edge is ARFEdgeLink aRFedge)
             {
-                List<float> transform = new List<float>();
-                transform.Add(1);
-                for (int i = 1; i < 5; i++)
+                if (aRFedge.worldLink == null)
                 {
-                    transform.Add(0);
-                }
-                transform.Add(1);
-                for (int i = 6; i < 10; i++)
-                {
-                    transform.Add(0);
-                }
-                transform.Add(1);
-                for (int i = 11; i < 15; i++)
-                {
-                    transform.Add(0);
-                }
-                transform.Add(1);
+                    List<float> transform = new List<float>();
+                    transform.Add(1);
+                    for (int i = 1; i < 5; i++)
+                    {
+                        transform.Add(0);
+                    }
+                    transform.Add(1);
+                    for (int i = 6; i < 10; i++)
+                    {
+                        transform.Add(0);
+                    }
+                    transform.Add(1);
+                    for (int i = 11; i < 15; i++)
+                    {
+                        transform.Add(0);
+                    }
+                    transform.Add(1);
 
-                WorldLink worldLink = new(Guid.NewGuid(), Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), Guid.Parse(fromNode.GUID), Guid.Parse(toNode.GUID), fromNode.GetElemType(), toNode.GetElemType(), transform, UnitSystem.CM, new Dictionary<string, List<string>>());
-                aRFedge.worldLink = worldLink;
-                aRFedge.GUID = worldLink.UUID.ToString();
-                aRFedge.viewDataKey = worldLink.UUID.ToString();
+                    WorldLink worldLink = new(Guid.NewGuid(), Guid.Parse(UtilGraphSingleton.instance.worldStorageUser.UUID), Guid.Parse(fromNode.GUID), Guid.Parse(toNode.GUID), fromNode.GetElemType(), toNode.GetElemType(), transform, UnitSystem.CM, new Dictionary<string, List<string>>());
+                    aRFedge.worldLink = worldLink;
+                    aRFedge.GUID = worldLink.UUID.ToString();
+                    aRFedge.viewDataKey = worldLink.UUID.ToString();
+                }
+                else
+                {
+                    aRFedge.worldLink.UUIDFrom = Guid.Parse(fromNode.GUID);
+                    aRFedge.worldLink.TypeFrom = fromNode.GetElemType();
 
+                    aRFedge.worldLink.UUIDTo = Guid.Parse(toNode.GUID);
+                    aRFedge.worldLink.TypeTo = toNode.GetElemType();
+                }
+                
                 //update scene
                 String parentName = aRFedge.output.node.title;
                 String elemName = aRFedge.input.node.title;
-                SceneBuilder.MoveGO(parentName, elemName, Matrix4x4.identity);
+                Matrix4x4 transformMatrix = SceneBuilder.ListToMatrix4x4(aRFedge.worldLink.Transform);
+                SceneBuilder.MoveGO(parentName, elemName, transformMatrix);
+
+
+                //update game object
+                GameObject prefab = GameObject.Find(elemName);
+                if (prefab != null)
+                {
+                    var trackablePrefab = (TrackableScript)prefab.GetComponent<TrackableScript>();
+                    var worldAnchorPrefab = (WorldAnchorScript)prefab.GetComponent<WorldAnchorScript>();
+                    if (trackablePrefab != null)
+                    {
+                        trackablePrefab.link = aRFedge.worldLink;
+                    }
+                    else if (worldAnchorPrefab != null)
+                    {
+                        worldAnchorPrefab.link = aRFedge.worldLink;
+                    }
+                    else
+                    {
+                        Debug.Log("Not supposed to be here");
+                    }
+                }
+                aRFedge.originalDestinationNode = (ARFNode)edge.input.node;
             }
         }
+
+
 
         public static ARFPort CreateARF<TEdge>(Orientation orientation, Direction direction, Capacity capacity, Type type) where TEdge : Edge, new()
         {

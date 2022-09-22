@@ -51,18 +51,33 @@ public class SceneBuilder : MonoBehaviour
         }
     }
 
+    internal static void PutAtTop(ARFNode node)
+    {
+        var gameObject = GameObject.Find(node.title);
+        if(gameObject != null)
+        {
+            gameObject.transform.parent = null;
+        }
+    }
+
     private static void GenerateTreeFromRoot(ARFNode root, Matrix4x4 transform, GameObject parent)
     {
+        //get the parent world Link
+        WorldLink parentLink = null;
+        if (root.portIn.connected)
+        {
+            parentLink = ((ARFEdgeLink)root.portIn.connections.ElementAt(0)).worldLink;
+        }
         //check if root is WA or Trackable
         //create the root GO
         GameObject newGameObject;
         if (root is ARFNodeTrackable)
         {
-            newGameObject = InstantiateTrackableGO(((ARFNodeTrackable)root).trackable, transform, parent);
+            newGameObject = InstantiateTrackableGO(((ARFNodeTrackable)root).trackable, parentLink, transform, parent);
         }
         else if(root is ARFNodeWorldAnchor)
         {
-            newGameObject = InstantiateWorldAnchorGO(((ARFNodeWorldAnchor)root).worldAnchor, transform, parent);
+            newGameObject = InstantiateWorldAnchorGO(((ARFNodeWorldAnchor)root).worldAnchor, parentLink, transform, parent);
         }
         else
         {
@@ -137,7 +152,7 @@ public class SceneBuilder : MonoBehaviour
         return visited;
     }
 
-    public static GameObject InstantiateTrackableGO(Trackable trackable, Matrix4x4 transform, GameObject parent)
+    public static GameObject InstantiateTrackableGO(Trackable trackable, WorldLink parentLink, Matrix4x4 transform, GameObject parent)
     {
         GameObject prefab = GameObject.Find(trackable.Name);
         if(prefab == null)
@@ -158,6 +173,7 @@ public class SceneBuilder : MonoBehaviour
             go.transform.position = transform.GetPosition();
             var myComponent = (TrackableScript)go.GetComponent<TrackableScript>();
             myComponent.trackable = trackable;
+            myComponent.link = parentLink;
             return go;
         }
         else
@@ -172,11 +188,12 @@ public class SceneBuilder : MonoBehaviour
             prefab.transform.position = transform.GetPosition();
             var myComponent = (TrackableScript)prefab.GetComponent<TrackableScript>();
             myComponent.trackable = trackable;
+            myComponent.link = parentLink;
             return prefab;
         }       
     }
 
-    public static GameObject InstantiateWorldAnchorGO(WorldAnchor worldAnchor, Matrix4x4 transform, GameObject parent)
+    public static GameObject InstantiateWorldAnchorGO(WorldAnchor worldAnchor, WorldLink parentLink, Matrix4x4 transform, GameObject parent)
     {
         GameObject prefab = GameObject.Find(worldAnchor.Name);
         if (prefab == null)
@@ -197,6 +214,7 @@ public class SceneBuilder : MonoBehaviour
             go.transform.position = transform.GetPosition();
             var myComponent = (WorldAnchorScript)go.GetComponent<WorldAnchorScript>();
             myComponent.worldAnchor = worldAnchor;
+            myComponent.link = parentLink;
             return go;
         }
         else
@@ -211,6 +229,7 @@ public class SceneBuilder : MonoBehaviour
             prefab.transform.position = transform.GetPosition();
             var myComponent = (WorldAnchorScript)prefab.GetComponent<WorldAnchorScript>();
             myComponent.worldAnchor = worldAnchor;
+            myComponent.link = parentLink;
             return prefab;
         }
     }
@@ -260,10 +279,10 @@ public class SceneBuilder : MonoBehaviour
         GameObject[] allObjects = (GameObject[])FindObjectsOfType(typeof(GameObject));
         foreach (GameObject GO in allObjects)
         {
-            if (EditorUtility.GetPrefabType(GO) == PrefabType.PrefabInstance)
+            if (PrefabUtility.GetPrefabType(GO) == PrefabType.PrefabInstance)
             {
                 UnityEngine.Object GO_prefab = EditorUtility.GetPrefabParent(GO);
-                if ((trackablePrefab == GO_prefab)|| (worldAnchorPrefab == GO_prefab))
+                if ((trackablePrefab == GO_prefab) || (worldAnchorPrefab == GO_prefab))
                     result.Add(GO);
             }
         }
@@ -274,9 +293,9 @@ public class SceneBuilder : MonoBehaviour
         UnityEngine.Object trackablePrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
         UnityEngine.Object worldAnchorPrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFWorldAnchor.prefab", typeof(GameObject));
         List<GameObject> result = new List<GameObject>(); 
-        foreach (Transform transfrom in parent.transform)
+        foreach (Transform transform in parent.transform)
         {
-            var GO = transfrom.gameObject;
+            var GO = transform.gameObject;
             if (EditorUtility.GetPrefabType(GO) == PrefabType.PrefabInstance)
             {
                 UnityEngine.Object GO_prefab = EditorUtility.GetPrefabParent(GO);
@@ -335,5 +354,16 @@ public class SceneBuilder : MonoBehaviour
                 }
             }
         }
+    }
+
+    public static Matrix4x4 ListToMatrix4x4(List<float> list)
+    {
+        Matrix4x4 localCRS = new Matrix4x4();
+        localCRS.m00 = list[0]; localCRS.m01 = list[1]; localCRS.m02 = list[2]; localCRS.m03 = list[3];
+        localCRS.m10 = list[4]; localCRS.m11 = list[5]; localCRS.m12 = list[6]; localCRS.m13 = list[7];
+        localCRS.m20 = list[8]; localCRS.m21 = list[9]; localCRS.m22 = list[10]; localCRS.m23 = list[11];
+        localCRS.m30 = list[12]; localCRS.m31 = list[13]; localCRS.m32 = list[14]; localCRS.m33 = list[15];
+
+        return localCRS;
     }
 }

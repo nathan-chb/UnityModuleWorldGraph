@@ -42,6 +42,10 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
 
         //to delay the reframe (otherwise it reframes when the graph isn't built yet)
         int twoFrames = 0;
+        public static WorldGraphWindow Instance
+        {
+            get { return GetWindow<WorldGraphWindow>(); }
+        }
 
         [MenuItem("ARFWorldStorage/Edit Graph...")]
         public static void ShowWindow()
@@ -165,6 +169,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             //Notify the user that the graph is different from the one in the server
             if (myGraph != null)
             {
+                UtilGraphSingleton.SynchronizeWithGameObjects();
                 if (myGraph.ServerAndLocalDifferent())
                 {
                     //the icon to add if the node does not correspond to an element in the server
@@ -176,11 +181,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     GUILayout.Box("There are elements in your graph that have been added, modified or deleted ! The current graph is not synchronized with the World Storage", leftStyle, GUILayout.ExpandWidth(true), GUILayout.Height(27));
                     GUILayout.EndHorizontal();
                 }
-            }
-
-            if(GUILayout.Button("Debug Generate Grap^h"))
-            {
-                SceneBuilder.InstantiateGraph(myGraph);
             }
         }
 
@@ -196,6 +196,11 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 UtilGraphSingleton.instance.elemsToUpdate.Add(guid);
             }
             ((ARFNode)graph.GetNodeByGuid(guid)).MarkUnsaved();
+        }
+
+        public ARFGraphView GetGraph()
+        {
+            return myGraph;
         }
     }
 }

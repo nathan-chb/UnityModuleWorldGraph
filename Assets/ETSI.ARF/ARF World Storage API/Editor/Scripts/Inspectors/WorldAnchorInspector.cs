@@ -12,6 +12,10 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
+            if (((WorldAnchorScript)target).link != null)
+            {
+                EditorGUILayout.LabelField(((WorldAnchorScript)target).link.ToString());
+            }
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("World Anchor : ");

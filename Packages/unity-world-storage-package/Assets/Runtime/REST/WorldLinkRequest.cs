@@ -39,7 +39,7 @@ namespace ETSI.ARF.WorldStorage.REST
     {
         static public string AddWorldLink(WorldStorageServer ws, WorldLink link)
         {
-            Debug.Log("Posting Add Trackable to Server");
+            Debug.Log("Posting Add World Link to Server");
             WorldLinksApi api = new WorldLinksApi(ws.URI);
             string result = api.AddWorldLink(link);
             Debug.Log(result);

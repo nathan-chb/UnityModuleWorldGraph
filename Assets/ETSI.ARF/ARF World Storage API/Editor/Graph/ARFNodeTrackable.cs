@@ -56,7 +56,7 @@ namespace ETSI.ARF.WorldStorage.UI
             mainContainer.Insert(titleIndex+1, colorRectangle);
 
             /*PORTS*/
-            var portIn = GeneratePort(this, Direction.Input, Port.Capacity.Multi);
+            var portIn = GeneratePort(this, Direction.Input, Port.Capacity.Single);
             portIn.portColor = new Color(0.66f, 0.39f, 1, 0.77f);
             portIn.portName = "Target"; // "Input"
             //portIn.AddManipulator(new EdgeConnector<ARFEdgeLink>(new WorldLinkListener()));

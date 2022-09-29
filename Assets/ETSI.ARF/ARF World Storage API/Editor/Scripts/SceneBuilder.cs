@@ -24,14 +24,6 @@ public class SceneBuilder : MonoBehaviour
     {
     }
 
-    //TO REMOVE
-    [MenuItem("Examples/Instantiate trackable")]
-    static void InstantiatePrefab()
-    {
-        UnityEngine.Object prefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
-        PrefabUtility.InstantiatePrefab(prefab as GameObject);
-    }
-
     public static void InstantiateGraph(ARFGraphView graphview)
     {
         //delete old GO
@@ -157,23 +149,46 @@ public class SceneBuilder : MonoBehaviour
         GameObject prefab = GameObject.Find(trackable.Name);
         if(prefab == null)
         {
-            prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
+            //Create the visual of the trackable gameObject
+            switch (trackable.TrackableType)
+            {
+                case Trackable.TrackableTypeEnum.FIDUCIALMARKER:
+                    prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableFiducial.prefab", typeof(GameObject));
+                    break;
+                case Trackable.TrackableTypeEnum.IMAGEMARKER:
+                    prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableImage.prefab", typeof(GameObject));
+                    break;
+                case Trackable.TrackableTypeEnum.GEOPOSE:
+                    prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableGeoPose.prefab", typeof(GameObject));
+                    break;
+                case Trackable.TrackableTypeEnum.MAP:
+                    prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackablePointCloud.prefab", typeof(GameObject));
+                    break;
+                case Trackable.TrackableTypeEnum.OTHER:
+                    prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableOther.prefab", typeof(GameObject));
+                    break;
+            }
+
             GameObject go = (GameObject)PrefabUtility.InstantiatePrefab(prefab as GameObject);
             go.name = trackable.Name;
             if (parent != null)
             {
                 go.transform.parent = parent.transform;
             }
+
+            //hide the prefab elements in the hierarchy
             foreach (Transform child in go.transform)
             {
                 child.hideFlags = HideFlags.HideInHierarchy;
             }
+
             go.transform.localScale = transform.lossyScale;
             go.transform.rotation = transform.rotation;
             go.transform.position = transform.GetPosition();
-            var myComponent = (TrackableScript)go.GetComponent<TrackableScript>();
-            myComponent.trackable = trackable;
-            myComponent.link = parentLink;
+
+            var trackScript = (TrackableScript)go.GetComponent<TrackableScript>();
+            trackScript.trackable = trackable;
+            trackScript.link = parentLink;
             return go;
         }
         else
@@ -273,6 +288,11 @@ public class SceneBuilder : MonoBehaviour
 
     public static List<GameObject> FindElementsPrefabInstances()
     {
+        UnityEngine.Object trackablePrefabFiducial = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableFiducial.prefab", typeof(GameObject));
+        UnityEngine.Object trackablePrefabImage = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableImage.prefab", typeof(GameObject));
+        UnityEngine.Object trackablePrefabGeoPose = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableGeoPose.prefab", typeof(GameObject));
+        UnityEngine.Object trackablePrefabPointCloud = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackablePointCloud.prefab", typeof(GameObject));
+        UnityEngine.Object trackablePrefabOther = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableOther.prefab", typeof(GameObject));
         UnityEngine.Object trackablePrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
         UnityEngine.Object worldAnchorPrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFWorldAnchor.prefab", typeof(GameObject));
         List<GameObject> result = new List<GameObject>();
@@ -282,14 +302,21 @@ public class SceneBuilder : MonoBehaviour
             if (PrefabUtility.GetPrefabType(GO) == PrefabType.PrefabInstance)
             {
                 UnityEngine.Object GO_prefab = EditorUtility.GetPrefabParent(GO);
-                if ((trackablePrefab == GO_prefab) || (worldAnchorPrefab == GO_prefab))
+                if ((trackablePrefab == GO_prefab) || (trackablePrefabFiducial == GO_prefab) || (trackablePrefabImage == GO_prefab) || (trackablePrefabGeoPose == GO_prefab) || (trackablePrefabPointCloud == GO_prefab) || (trackablePrefabOther == GO_prefab) || (worldAnchorPrefab == GO_prefab))
+                {
                     result.Add(GO);
+                }
             }
         }
         return result;
     }
     public static List<GameObject> FindElementsPrefabInstancesInChilds(GameObject parent)
     {
+        UnityEngine.Object trackablePrefabFiducial = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableFiducial.prefab", typeof(GameObject));
+        UnityEngine.Object trackablePrefabImage = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableImage.prefab", typeof(GameObject));
+        UnityEngine.Object trackablePrefabGeoPose = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableGeoPose.prefab", typeof(GameObject));
+        UnityEngine.Object trackablePrefabPointCloud = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackablePointCloud.prefab", typeof(GameObject));
+        UnityEngine.Object trackablePrefabOther = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableOther.prefab", typeof(GameObject));
         UnityEngine.Object trackablePrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
         UnityEngine.Object worldAnchorPrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFWorldAnchor.prefab", typeof(GameObject));
         List<GameObject> result = new List<GameObject>(); 
@@ -299,8 +326,10 @@ public class SceneBuilder : MonoBehaviour
             if (EditorUtility.GetPrefabType(GO) == PrefabType.PrefabInstance)
             {
                 UnityEngine.Object GO_prefab = EditorUtility.GetPrefabParent(GO);
-                if ((trackablePrefab == GO_prefab) || (worldAnchorPrefab == GO_prefab))
+                if ((trackablePrefab == GO_prefab) || (trackablePrefabFiducial == GO_prefab) || (trackablePrefabImage == GO_prefab) || (trackablePrefabGeoPose == GO_prefab) || (trackablePrefabPointCloud == GO_prefab) || (trackablePrefabOther == GO_prefab) || (worldAnchorPrefab == GO_prefab))
+                {
                     result.Add(GO);
+                }
             }
         }
         return result;
@@ -365,5 +394,57 @@ public class SceneBuilder : MonoBehaviour
         localCRS.m30 = list[12]; localCRS.m31 = list[13]; localCRS.m32 = list[14]; localCRS.m33 = list[15];
 
         return localCRS;
+    }
+
+    public static void ChangeTrackableType(Trackable trackable)
+    {
+        GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableOther.prefab", typeof(GameObject)); ;
+        switch (trackable.TrackableType)
+        {
+            case Trackable.TrackableTypeEnum.FIDUCIALMARKER:
+                prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableFiducial.prefab", typeof(GameObject));
+                break;
+            case Trackable.TrackableTypeEnum.IMAGEMARKER:
+                prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableImage.prefab", typeof(GameObject));
+                break;
+            case Trackable.TrackableTypeEnum.GEOPOSE:
+                prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableGeoPose.prefab", typeof(GameObject));
+                break;
+            case Trackable.TrackableTypeEnum.MAP:
+                prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackablePointCloud.prefab", typeof(GameObject));
+                break;
+            default:
+                break;
+        }
+
+        //find the gameObject related to the trackable
+        var oldGameObject = GameObject.Find(trackable.Name);
+        var oldTrackScript = (TrackableScript)oldGameObject.GetComponent<TrackableScript>();
+
+        //create the new gameObject
+        GameObject newGameObject = (GameObject)PrefabUtility.InstantiatePrefab(prefab as GameObject);
+        //hide the prefab elements in the hierarchy
+        foreach (Transform child in newGameObject.transform)
+        {
+            child.hideFlags = HideFlags.HideInHierarchy;
+        }
+        var newTrackScript = (TrackableScript)newGameObject.GetComponent<TrackableScript>();
+
+        //give it all its attributes
+        newTrackScript.trackable = oldTrackScript.trackable;
+        newTrackScript.link = oldTrackScript.link;
+        newGameObject.transform.position = oldGameObject.transform.position;
+        newGameObject.transform.rotation = oldGameObject.transform.rotation;
+
+        //put it at the same place in the hierarchy
+        newGameObject.transform.parent = oldGameObject.transform.parent;
+        foreach (var child in SceneBuilder.FindElementsPrefabInstancesInChilds(oldGameObject))
+        {
+            child.transform.parent = newGameObject.transform;
+        }
+
+        //finaly, delete the old gameObject & change the name of the new GameObejct
+        SceneBuilder.DeleteGO(trackable.Name);
+        newGameObject.name = trackable.Name;
     }
 }

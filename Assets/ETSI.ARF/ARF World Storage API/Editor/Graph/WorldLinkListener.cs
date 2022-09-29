@@ -20,6 +20,7 @@
 
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
 using ETSI.ARF.WorldStorage.UI;
+using System;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -43,18 +44,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
         }
         public void OnDrop(GraphView graphView, Edge edge)
         {
-            //if the edge was previously connected to another node, move that node in the scene hierarchy and put it at 0,0,0
-            if(((ARFEdgeLink)edge).originalDestinationNode != null)
-            {
-                var gameObject = GameObject.Find(((ARFEdgeLink)edge).originalDestinationNode.title);
-                gameObject.transform.parent = null;
-                SceneBuilder.MoveGO(null, gameObject.name, Matrix4x4.identity);
-
-                //mark it as modified
-                ((ARFEdgeLink)edge).MarkUnsaved();
-                UtilGraphSingleton.instance.elemsToUpdate.Add(((ARFEdgeLink)edge).GUID);
-            }
-
             m_EdgesToCreate.Add(edge);
             m_EdgesToDelete.Clear();
             if (edge.input.capacity == Capacity.Single)
@@ -101,7 +90,19 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
                 ((ARFEdgeLink)edge).MarkUnsaved();
             }
             GraphEditorWindow.ShowWindow((ARFEdgeLink)edge);
+            //if the edge was previously connected to another node, move that node in the scene hierarchy and put it at 0,0,0
+            if (((ARFEdgeLink)edge).originalDestinationNode != null)
+            {
+                var gameObject = GameObject.Find(((ARFEdgeLink)edge).originalDestinationNode.title);
+                gameObject.transform.parent = null;
+                SceneBuilder.MoveGO(null, gameObject.name, Matrix4x4.identity);
+
+                //mark it as modified
+                ((ARFEdgeLink)edge).MarkUnsaved();
+                UtilGraphSingleton.instance.elemsToUpdate.Add(((ARFEdgeLink)edge).GUID);
+            }
             ((ARFEdgeLink)edge).originalDestinationNode = (ARFNode)edge.input.node;
+            m_EdgesToCreate.Clear();
         }
 
         public void OnDropOutsidePort(Edge edge, Vector2 position)

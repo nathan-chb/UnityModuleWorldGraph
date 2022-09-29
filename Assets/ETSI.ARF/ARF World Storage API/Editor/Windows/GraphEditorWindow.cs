@@ -715,8 +715,14 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
 
                 //trackable's type
                 EditorGUILayout.BeginHorizontal();
+                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.LabelField("Type ", EditorStyles.boldLabel, GUILayout.Width(50));
                 trackable.TrackableType = (Trackable.TrackableTypeEnum)EditorGUILayout.EnumPopup(trackable.TrackableType);
+                //If the type of the trackable changed, change the scene
+                if (EditorGUI.EndChangeCheck())
+                {
+                    SceneBuilder.ChangeTrackableType(trackable);
+                }
                 EditorGUILayout.EndHorizontal();
 
                 //unit system

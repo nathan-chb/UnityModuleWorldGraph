@@ -104,7 +104,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
                         Debug.Log("Not supposed to be here");
                     }
                 }
-                aRFedge.originalDestinationNode = (ARFNode)edge.input.node;
             }
         }
 

@@ -608,6 +608,7 @@ namespace ETSI.ARF.WorldStorage.UI
                         uuid = uuid.Replace("\"", "");
                         foreach (ARFEdgeLink edge in aRFNodeTrackable.portIn.connections)
                         {
+                            Debug.Log("in connection " + aRFNodeTrackable.title);
                             edge.worldLink.UUIDTo = Guid.Parse(uuid);
                         }
                         foreach (ARFEdgeLink edge in aRFNodeTrackable.portOut.connections)

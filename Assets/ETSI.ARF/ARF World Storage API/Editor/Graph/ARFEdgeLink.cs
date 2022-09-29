@@ -19,6 +19,7 @@
 //
 
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
+using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 using ETSI.ARF.WorldStorage.UI;
 using Org.OpenAPITools.Model;
 using UnityEditor;
@@ -85,6 +86,23 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
             if (UtilGraphSingleton.instance.elemsToUpdate.Contains(GUID))
             {
                 UtilGraphSingleton.instance.elemsToUpdate.Remove(GUID);
+            }
+
+            //mark the son's GameObject as not modified
+            string nodeName = this.input.node.title;
+            var go = GameObject.Find(nodeName);
+            if(go != null)
+            {
+                var worldAnchorScript = (WorldAnchorScript)go.GetComponent<WorldAnchorScript>();
+                var trackableScript = (TrackableScript)go.GetComponent<TrackableScript>();
+                if (worldAnchorScript != null)
+                {
+                    worldAnchorScript.modified = false;
+                }
+                else if (trackableScript != null)
+                {
+                    trackableScript.modified = false;
+                }
             }
         }
     }

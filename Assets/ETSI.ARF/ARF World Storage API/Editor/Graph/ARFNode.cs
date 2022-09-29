@@ -47,7 +47,7 @@ namespace ETSI.ARF.WorldStorage.UI
 
         public Image savedIcon;
 
-        public ARFNode()
+        public ARFNode() : base()
         {
         }
         public override Port InstantiatePort(Orientation orientation, Direction direction, Port.Capacity capacity, Type type)

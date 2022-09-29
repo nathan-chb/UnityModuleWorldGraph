@@ -376,6 +376,9 @@ namespace ETSI.ARF.WorldStorage.UI
                 edge.worldLink = worldLink;
                 edge.GUID = worldLink.UUID.ToString();
                 edge.viewDataKey = edge.GUID;
+                edge.originalDestinationNode = (ARFNode)portPair.Key.node;
+                edge.originalDestinationNode = (ARFNode)portPair.Value.node;
+
 
                 AddElement(edge);
             }
@@ -608,7 +611,6 @@ namespace ETSI.ARF.WorldStorage.UI
                         uuid = uuid.Replace("\"", "");
                         foreach (ARFEdgeLink edge in aRFNodeTrackable.portIn.connections)
                         {
-                            Debug.Log("in connection " + aRFNodeTrackable.title);
                             edge.worldLink.UUIDTo = Guid.Parse(uuid);
                         }
                         foreach (ARFEdgeLink edge in aRFNodeTrackable.portOut.connections)
@@ -711,6 +713,7 @@ namespace ETSI.ARF.WorldStorage.UI
 
             GraphEditorWindow.ResetWindow();
         }
+
 
     }
 }

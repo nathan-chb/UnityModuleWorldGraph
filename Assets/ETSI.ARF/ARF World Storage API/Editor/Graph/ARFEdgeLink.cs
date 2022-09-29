@@ -38,6 +38,8 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
 
         //used when the edge input destination is changed
         public ARFNode originalDestinationNode;
+        //used when the edge output destination is changed
+        public ARFNode originalOriginNode;
 
         public ARFEdgeLink()
         {

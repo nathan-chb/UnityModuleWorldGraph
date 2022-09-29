@@ -369,18 +369,14 @@ public class SceneBuilder : MonoBehaviour
                 //Move the game object to the new position
                 {
                     elem.transform.localScale = matrix.lossyScale;
-                    elem.transform.rotation = matrix.rotation;
-                    elem.transform.position = matrix.GetPosition();
+                    elem.transform.SetPositionAndRotation(matrix.GetPosition(), matrix.rotation);
                 }
             }
             else
             {
                 //Move the game object to the new position
-                {
-                    elem.transform.localScale = transform.lossyScale;
-                    elem.transform.rotation = transform.rotation;
-                    elem.transform.position = transform.GetPosition();
-                }
+                elem.transform.localScale = transform.lossyScale;
+                elem.transform.SetPositionAndRotation(transform.GetPosition(), transform.rotation);
             }
         }
     }

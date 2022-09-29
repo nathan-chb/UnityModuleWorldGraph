@@ -110,6 +110,12 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             worldStorageServer = (WorldStorageServer)EditorGUILayout.ObjectField("World Storage Server", worldStorageServer, typeof(WorldStorageServer), false, GUILayout.Width(500));
             if (EditorGUI.EndChangeCheck())
             {
+                //delete old GO
+                //delete Elements prefab
+                foreach (var pref in SceneBuilder.FindElementsPrefabInstances())
+                {
+                    DestroyImmediate(pref);
+                }
                 GraphEditorWindow.ResetWindow();
 
                 if((myGraph != null))
@@ -179,6 +185,17 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     GUILayout.Box(warningImage, GUILayout.Width(27), GUILayout.Height(27));
                     GUILayout.Box("There are elements in your graph that have been added, modified or deleted ! The current graph is not synchronized with the World Storage", leftStyle, GUILayout.ExpandWidth(true), GUILayout.Height(27));
                     GUILayout.EndHorizontal();
+                }
+            }
+            if (GUILayout.Button("debug"))
+            {
+                foreach(GraphElement link in myGraph.graphElements)
+                {
+                    var arflink = link as ARFEdgeLink;
+                    if(arflink != null)
+                    {
+                        Debug.Log(arflink.output.node.title + " " + arflink.input.node.title);
+                    }
                 }
             }
         }

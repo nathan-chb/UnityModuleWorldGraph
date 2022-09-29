@@ -19,6 +19,7 @@
 //
 
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
+using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 using ETSI.ARF.WorldStorage.UI;
 using System;
 using System.Collections.Generic;
@@ -91,8 +92,10 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
                 ((ARFEdgeLink)edge).MarkUnsaved();
             }
             GraphEditorWindow.ShowWindow((ARFEdgeLink)edge);
+
             //if the edge was previously connected to another node, move that node in the scene hierarchy and put it at 0,0,0
-            if (((ARFEdgeLink)edge).originalDestinationNode != null)
+            //for input node
+            if ((((ARFEdgeLink)edge).originalDestinationNode != null) && (((ARFEdgeLink)edge).originalDestinationNode != (ARFNode)edge.input.node))
             {
                 var gameObject = GameObject.Find(((ARFEdgeLink)edge).originalDestinationNode.title);
                 gameObject.transform.parent = null;
@@ -101,13 +104,56 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
                 //mark it as modified
                 ((ARFEdgeLink)edge).MarkUnsaved();
                 UtilGraphSingleton.instance.elemsToUpdate.Add(((ARFEdgeLink)edge).GUID);
+
+                //remove the parent link from the script
+                var trackablePrefab = (TrackableScript)gameObject.GetComponent<TrackableScript>();
+                var worldAnchorPrefab = (WorldAnchorScript)gameObject.GetComponent<WorldAnchorScript>();
+                if (trackablePrefab != null)
+                {
+                    trackablePrefab.link = null;
+                }
+                else if (worldAnchorPrefab != null)
+                {
+                    worldAnchorPrefab.link = null;
+                }
+                else
+                {
+                    Debug.Log("Not supposed to be here");
+                }
+            }
+            //same for output node
+            else if ((((ARFEdgeLink)edge).originalOriginNode != null) && (((ARFEdgeLink)edge).originalOriginNode != (ARFNode)edge.output.node))
+            {
+                var gameObject = GameObject.Find(((ARFEdgeLink)edge).originalOriginNode.title);
+                gameObject.transform.parent = null;
+                SceneBuilder.MoveGO(null, gameObject.name, Matrix4x4.identity);
+
+                //mark it as modified
+                ((ARFEdgeLink)edge).MarkUnsaved();
+                UtilGraphSingleton.instance.elemsToUpdate.Add(((ARFEdgeLink)edge).GUID);
+
+                //remove the parent link from the script
+                var trackablePrefab = (TrackableScript)gameObject.GetComponent<TrackableScript>();
+                var worldAnchorPrefab = (WorldAnchorScript)gameObject.GetComponent<WorldAnchorScript>();
+                if (trackablePrefab != null)
+                {
+                    trackablePrefab.link = null;
+                }
+                else if (worldAnchorPrefab != null)
+                {
+                    worldAnchorPrefab.link = null;
+                }
+                else
+                {
+                    Debug.Log("Not supposed to be here");
+                }
             }
             ((ARFEdgeLink)edge).originalDestinationNode = (ARFNode)edge.input.node;
+            ((ARFEdgeLink)edge).originalOriginNode = (ARFNode)edge.output.node;
         }
 
         public void OnDropOutsidePort(Edge edge, Vector2 position)
         {
-            ;
         }
     }
 }

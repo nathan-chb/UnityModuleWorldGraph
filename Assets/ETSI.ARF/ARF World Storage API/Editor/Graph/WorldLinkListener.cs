@@ -44,6 +44,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
         }
         public void OnDrop(GraphView graphView, Edge edge)
         {
+            m_EdgesToCreate.Clear();
             m_EdgesToCreate.Add(edge);
             m_EdgesToDelete.Clear();
             if (edge.input.capacity == Capacity.Single)
@@ -102,11 +103,11 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
                 UtilGraphSingleton.instance.elemsToUpdate.Add(((ARFEdgeLink)edge).GUID);
             }
             ((ARFEdgeLink)edge).originalDestinationNode = (ARFNode)edge.input.node;
-            m_EdgesToCreate.Clear();
         }
 
         public void OnDropOutsidePort(Edge edge, Vector2 position)
         {
+            ;
         }
     }
 }

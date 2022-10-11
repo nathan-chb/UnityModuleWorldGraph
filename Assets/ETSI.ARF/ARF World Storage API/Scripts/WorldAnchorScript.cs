@@ -15,6 +15,8 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
         public WorldLink link;
         [HideInInspector]
         public bool modified;
+        [HideInInspector]
+        public GameObject model;
 
         Vector3 localPosition;
         Quaternion localRotation;
@@ -28,7 +30,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
             localPosition = transform.localPosition;
             localRotation = transform.localRotation;
             localScale = transform.localScale;
-        }
+    }
 
         // Update is called once per frame
         void Update()

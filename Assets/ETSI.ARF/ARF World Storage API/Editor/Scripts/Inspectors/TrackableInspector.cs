@@ -12,7 +12,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
     {
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
             if (((TrackableScript)target).link != null)
             {
                 EditorGUILayout.LabelField(((TrackableScript)target).link.ToString());

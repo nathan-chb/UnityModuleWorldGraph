@@ -22,6 +22,7 @@ public class SceneBuilder : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
     }
 
     public static void InstantiateGraph(ARFGraphView graphview)

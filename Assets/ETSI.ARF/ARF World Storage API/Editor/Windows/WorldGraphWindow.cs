@@ -222,6 +222,23 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             ((ARFNode)graph.GetNodeByGuid(guid)).MarkUnsaved();
         }
 
+        public static void ChangeAnchorURL(String url, String guid)
+        {
+            var window = WorldGraphWindow.GetWindow<WorldGraphWindow>("Graph Editor", false, typeof(SceneView));
+            var graph = window.myGraph;
+
+            if (graph.GetNodeByGuid(guid) is ARFNodeWorldAnchor anchorNode)
+            {
+                anchorNode.worldAnchor.KeyvalueTags["ModelURL"] = new List<String>(){url};
+
+                if (UtilGraphSingleton.instance.nodePositions.ContainsKey(guid) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(guid)))
+                {
+                    UtilGraphSingleton.instance.elemsToUpdate.Add(guid);
+                }
+                ((ARFNode)graph.GetNodeByGuid(guid)).MarkUnsaved();
+            }
+        }
+
         public ARFGraphView GetGraph()
         {
             return myGraph;

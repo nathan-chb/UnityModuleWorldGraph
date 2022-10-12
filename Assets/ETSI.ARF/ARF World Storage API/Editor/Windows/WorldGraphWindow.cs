@@ -189,14 +189,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             }
             if (GUILayout.Button("debug"))
             {
-                foreach(GraphElement link in myGraph.graphElements)
-                {
-                    var arflink = link as ARFEdgeLink;
-                    if(arflink != null)
-                    {
-                        Debug.Log(arflink.output.node.title + " " + arflink.input.node.title);
-                    }
-                }
+                Debug.Log($"{Application.dataPath}");
             }
         }
 

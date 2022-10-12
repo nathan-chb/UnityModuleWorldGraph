@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
+using Siccity.GLTFUtility;
 
 namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
 {
@@ -93,7 +95,19 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
                 WorldGraphWindow.ChangeAnchorURL(modelUrl, script.worldAnchor.UUID.ToString());
 
                 //FAIRE LA COROUTINE
-                EditorCoroutineUtility.StartCoroutineOwnerless(LoadModel(modelUrl));
+                EditorCoroutineUtility.StartCoroutineOwnerless(LoadModel(modelUrl, (UnityWebRequest req) =>
+                {
+                    if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
+                    {
+                        // Log any errors that may happen
+                        Debug.Log($"{req.error} : {req.downloadHandler.text}");
+                    }
+                    else
+                    {
+                        // Save the model into a new wrapper
+                        GameObject model = Importer.LoadFromFile(GetFilePath(modelUrl));
+                    }
+                }));
 
             }
             EditorGUILayout.EndHorizontal();
@@ -113,15 +127,41 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
             }
         }
 
-        IEnumerator LoadModel(string url)
+        IEnumerator LoadModel(string url, Action<UnityWebRequest> callback)
         {
-            /*using (UnityWebRequest req = UnityWebRequest.Get(url))
+            using (UnityWebRequest req = UnityWebRequest.Get(url))
             {
+                req.downloadHandler = new DownloadHandlerFile(GetFilePath(url));
                 yield return req.SendWebRequest();
                 callback(req);
-            }*/
-            Debug.Log(url);
-            yield return null;
+            }
+        }
+
+        string GetFilePath(string url)
+        {
+            string filename = GetFileName(url);
+            return $"{Application.dataPath}/3DModels/{filename}";
+        }
+
+        public static string GetFileName(string url)
+        {
+            string[] strings = null;
+            if (url.Contains("\\"))
+            {
+                strings = url.Split("\\");
+            } 
+            else if (url.Contains("/"))
+            {
+                strings = url.Split("/");
+            }
+            if(strings != null)
+            {
+                return strings[^1];
+            }
+            else
+            {
+                return "";
+            }
         }
     }
 }

@@ -145,6 +145,8 @@ public class SceneBuilder : MonoBehaviour
         return visited;
     }
 
+
+    //Method to generate a gameObject from a Trackable
     public static GameObject InstantiateTrackableGO(Trackable trackable, WorldLink parentLink, Matrix4x4 transform, GameObject parent)
     {
         GameObject prefab = GameObject.Find(trackable.Name);
@@ -209,6 +211,7 @@ public class SceneBuilder : MonoBehaviour
         }       
     }
 
+    //Method to generate a gameObject from a WorldAnchor
     public static GameObject InstantiateWorldAnchorGO(WorldAnchor worldAnchor, WorldLink parentLink, Matrix4x4 transform, GameObject parent)
     {
         GameObject prefab = GameObject.Find(worldAnchor.Name);
@@ -250,43 +253,7 @@ public class SceneBuilder : MonoBehaviour
         }
     }
 
-
-    // Update is called once per frame
-    void Update()
-    {
-        GameObject visual = GameObject.Find("test");
-        if (visual == null)
-        {
-            Instantiate(myPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-            visual.name = "test";
-        }
-        else
-        {
-            Debug.Log("oops");
-        }
-    }
-    public GameObject GenerateAndUpdateVisual(string UUID, string name, Vector3 pos, Vector3 rot)
-        {
-
-            //create the parentgameobject 
-            GameObject arf = GameObject.Find("Graph");
-            if (arf == null) arf = new GameObject("Graph");
-
-            GameObject visual = GameObject.Find(UUID);
-
-            if (visual == null)
-        {
-                Instantiate(myPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-                visual.name = UUID;
-            }
-            else
-            {
-                visual.transform.SetPositionAndRotation(pos, Quaternion.Euler(rot));
-            }
-            visual.transform.Find("Canvas/Text").GetComponent<TextMeshProUGUI>().text = $"Name: { name }\nUUID: { UUID }";
-            return visual;
-        }
-
+    //Find all instantiated trackable and WA Prefabs in the scene
     public static List<GameObject> FindElementsPrefabInstances()
     {
         UnityEngine.Object trackablePrefabFiducial = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableFiducial.prefab", typeof(GameObject));
@@ -311,6 +278,8 @@ public class SceneBuilder : MonoBehaviour
         }
         return result;
     }
+
+    //Find all instantiated trackable and WA Prefabs among the childs of a gameObject
     public static List<GameObject> FindElementsPrefabInstancesInChilds(GameObject parent)
     {
         UnityEngine.Object trackablePrefabFiducial = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableFiducial.prefab", typeof(GameObject));

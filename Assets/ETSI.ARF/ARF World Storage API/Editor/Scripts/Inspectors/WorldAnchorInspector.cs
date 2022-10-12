@@ -16,8 +16,13 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
     [CustomEditor(typeof(WorldAnchorScript))]
     public class WorldAnchorInspector : UnityEditor.Editor
     {
+        //The chackbox to show the model or not
         bool activated;
+
+        //The url field to change the aanchor's model
         String modelUrl;
+
+        //The target object of this inspector
         WorldAnchorScript script; 
 
         public void Awake()
@@ -31,7 +36,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
             {
                 activated = false;
             }
-            modelUrl = GetModelUrl(script.worldAnchor);
+            modelUrl = WorldAnchorScript.GetModelUrl(script.worldAnchor);
         }
         public override void OnInspectorGUI()
         {
@@ -69,16 +74,16 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
             {
                 if (activated)
                 {
-                    if((script.model != null) && (!script.gameObject.activeInHierarchy))
+                    if((script.model != null) && (!script.model.activeInHierarchy))
                     {
-                        script.gameObject.SetActive(true); ;
+                        script.model.SetActive(true); ;
                     }
                 }
                 else
                 {
-                    if ((script.model != null) && (script.gameObject.activeInHierarchy))
+                    if ((script.model != null) && (script.model.activeInHierarchy))
                     {
-                        script.gameObject.SetActive(false); ;
+                        script.model.SetActive(false); ;
                     }
                 }
             }
@@ -94,25 +99,41 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
             {
                 WorldGraphWindow.ChangeAnchorURL(modelUrl, script.worldAnchor.UUID.ToString());
 
-                //FAIRE LA COROUTINE
-                EditorCoroutineUtility.StartCoroutineOwnerless(LoadModel(modelUrl, (UnityWebRequest req) =>
+                //destroy the first GameObject
+                if (script.model != null)
                 {
-                    if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
+                    DestroyImmediate(script.model);
+                }
+
+                if (modelUrl != "")
+                {
+                    EditorCoroutineUtility.StartCoroutineOwnerless(WorldAnchorScript.LoadModel(modelUrl, (UnityWebRequest req) =>
                     {
-                        // Log any errors that may happen
-                        Debug.Log($"{req.error} : {req.downloadHandler.text}");
-                    }
-                    else
-                    {
-                        // Save the model into a new wrapper
-                        GameObject model = Importer.LoadFromFile(GetFilePath(modelUrl));
-                    }
-                }));
+                        if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
+                        {
+                            // Log any errors that may happen
+                            Debug.Log($"{req.error} : {req.downloadHandler.text}");
+                        }
+                        else
+                        {
+                            // Save the model into the anchor script attribute
+                            script.model = Importer.LoadFromFile(WorldAnchorScript.GetFilePath(modelUrl));
+                            script.model.transform.parent = script.gameObject.transform;
+                            script.model.tag = "EditorOnly";
+                            script.model.name = WorldAnchorScript.GetFileName(modelUrl);
+                            foreach(Transform child in script.model.transform)
+                            {
+                                child.hideFlags |= HideFlags.HideInHierarchy;
+                            }
+                        }
+                    }));
+                }
 
             }
             EditorGUILayout.EndHorizontal();
         }
 
+        //gets the url from the keyvalue attribute
         public static string GetModelUrl(WorldAnchor worldAnchor)
         {
             List<string> list;
@@ -124,43 +145,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
             else
             {
                 return null;
-            }
-        }
-
-        IEnumerator LoadModel(string url, Action<UnityWebRequest> callback)
-        {
-            using (UnityWebRequest req = UnityWebRequest.Get(url))
-            {
-                req.downloadHandler = new DownloadHandlerFile(GetFilePath(url));
-                yield return req.SendWebRequest();
-                callback(req);
-            }
-        }
-
-        string GetFilePath(string url)
-        {
-            string filename = GetFileName(url);
-            return $"{Application.dataPath}/3DModels/{filename}";
-        }
-
-        public static string GetFileName(string url)
-        {
-            string[] strings = null;
-            if (url.Contains("\\"))
-            {
-                strings = url.Split("\\");
-            } 
-            else if (url.Contains("/"))
-            {
-                strings = url.Split("/");
-            }
-            if(strings != null)
-            {
-                return strings[^1];
-            }
-            else
-            {
-                return "";
             }
         }
     }

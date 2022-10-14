@@ -4,8 +4,6 @@ using Siccity.GLTFUtility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.EditorCoroutines.Editor;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -15,7 +13,39 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
     public class WorldAnchorScript : MonoBehaviour
     {
         [SerializeField]
-        public WorldAnchor worldAnchor;
+        private WorldAnchor _worldAnchor;
+        public WorldAnchor worldAnchor
+        {
+            get { return _worldAnchor; }
+            set
+            {
+                _worldAnchor = value;
+                string modelUrl = WorldAnchorScript.GetModelUrl(_worldAnchor);
+                if ((modelUrl != "") && (model == null))
+                {
+                    StartCoroutine(LoadModel(modelUrl, (UnityWebRequest req) =>
+                    {
+                        if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
+                        {
+                            // Log any errors that may happen
+                            Debug.Log($"{req.error} : {req.downloadHandler.text}");
+                        }
+                        else
+                        {
+                            // Save the model into the anchor script attribute
+                            model = Importer.LoadFromFile(GetFilePath(modelUrl));
+                            model.transform.parent = gameObject.transform;
+                            model.tag = "EditorOnly";
+                            model.name = GetFileName(modelUrl);
+                            foreach (Transform child in model.transform)
+                            {
+                                child.hideFlags |= HideFlags.HideInHierarchy;
+                            }
+                        }
+                    }));
+                }
+            }
+        }
         [HideInInspector]
         public WorldLink link;
         [HideInInspector]
@@ -35,30 +65,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
             localPosition = transform.localPosition;
             localRotation = transform.localRotation;
             localScale = transform.localScale;
-            string modelUrl = WorldAnchorScript.GetModelUrl(worldAnchor);
-            if ((modelUrl != "") && (model == null))
-            {
-                EditorCoroutineUtility.StartCoroutineOwnerless(LoadModel(modelUrl, (UnityWebRequest req) =>
-                {
-                    if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
-                    {
-                        // Log any errors that may happen
-                        Debug.Log($"{req.error} : {req.downloadHandler.text}");
-                    }
-                    else
-                    {
-                        // Save the model into the anchor script attribute
-                        model = Importer.LoadFromFile(GetFilePath(modelUrl));
-                        model.transform.parent = gameObject.transform;
-                        model.tag = "EditorOnly";
-                        model.name = GetFileName(modelUrl);
-                        foreach (Transform child in model.transform)
-                        {
-                            child.hideFlags |= HideFlags.HideInHierarchy;
-                        }
-                    }
-                }));
-            }
         }
 
         // Update is called once per frame
@@ -117,7 +123,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
             }
             else
             {
-                return null;
+                return "";
             }
         }
 

@@ -9,15 +9,6 @@
       },
       "hash": "ac70aeb91915ccb157eedca167b7de8a4b55fd31"
     },
-    "com.unity.collab-proxy": {
-      "version": "1.15.15",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.services.core": "1.0.1"
-      },
-      "url": "https://packages.unity.com"
-    },
     "com.unity.editorcoroutines": {
       "version": "1.0.0",
       "depth": 0,
@@ -62,15 +53,6 @@
       "depth": 1,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.services.core": {
-      "version": "1.0.1",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.modules.unitywebrequest": "1.0.0"
-      },
       "url": "https://packages.unity.com"
     },
     "com.unity.sysroot": {
@@ -139,13 +121,6 @@
         "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0"
       }
-    },
-    "etsi.isg.arf.worldstorage": {
-      "version": "https://labs.etsi.org/rep/arf/world-storage-api-helpers/unity-world-storage-package.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "63daed65a2ea73f5c32748d8608b1a81b898e769"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

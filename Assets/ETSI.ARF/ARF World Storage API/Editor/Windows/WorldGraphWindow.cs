@@ -156,18 +156,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
 
             GUILayout.Label("Augmented Reality Framework", leftStyle);
             GUILayout.Label("Copyright (C) 2022, ETSI (BSD 3-Clause License)", leftStyle);
-
-            //reframe all elements to see them all
-            if (UtilGraphSingleton.instance.toReFrame && (twoFrames == 2))
-            {
-                myGraph.FrameAllElements();
-                UtilGraphSingleton.instance.toReFrame = false;
-                twoFrames = 0;
-            }
-            else if (UtilGraphSingleton.instance.toReFrame)
-            {
-                twoFrames++;
-            }
             EditorGUILayout.EndVertical();
 
             GUILayout.FlexibleSpace();
@@ -175,6 +163,19 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             //Notify the user that the graph is different from the one in the server
             if (myGraph != null)
             {
+
+                //reframe all elements to see them all
+                if (UtilGraphSingleton.instance.toReFrame && (twoFrames == 2))
+                {
+                    myGraph.FrameAllElements();
+                    UtilGraphSingleton.instance.toReFrame = false;
+                    twoFrames = 0;
+                }
+                else if (UtilGraphSingleton.instance.toReFrame)
+                {
+                    twoFrames++;
+                }
+
                 if (myGraph.ServerAndLocalDifferent())
                 {
                     //the icon to add if the node does not correspond to an element in the server

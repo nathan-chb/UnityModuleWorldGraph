@@ -30,7 +30,7 @@ namespace ETSI.ARF.WorldStorage.UI
             {
                 Debug.Log("Rien à tracer");
             }
-        }
 #endif
+        }
     }
 }

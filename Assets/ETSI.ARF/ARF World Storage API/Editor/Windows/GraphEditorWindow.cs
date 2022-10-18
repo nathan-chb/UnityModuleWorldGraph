@@ -574,10 +574,14 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     }
                     else
                     {
-                        var posX = new List<String>();
-                        posX.Add(worldAnchorNode.GetPosition().x.ToString());
-                        var posY = new List<String>();
-                        posY.Add(worldAnchorNode.GetPosition().y.ToString());
+                        var posX = new List<String>
+                        {
+                            worldAnchorNode.GetPosition().x.ToString()
+                        };
+                        var posY = new List<String>
+                        {
+                            worldAnchorNode.GetPosition().y.ToString()
+                        };
                         WorldAnchor worldAnchor = worldAnchorNode.worldAnchor;
                         worldAnchor.KeyvalueTags["unityAuthoringPosX"] = posX;
                         worldAnchor.KeyvalueTags["unityAuthoringPosY"] = posY;
@@ -1077,10 +1081,14 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     }
                     else
                     {
-                        var posX = new List<String>();
-                        posX.Add(trackableNode.GetPosition().x.ToString());
-                        var posY = new List<String>();
-                        posY.Add(trackableNode.GetPosition().y.ToString());
+                        var posX = new List<String>
+                        {
+                            trackableNode.GetPosition().x.ToString()
+                        };
+                        var posY = new List<String>
+                        {
+                            trackableNode.GetPosition().y.ToString()
+                        };
                         Trackable trackable = trackableNode.trackable;
                         trackable.KeyvalueTags["unityAuthoringPosX"] = posX;
                         trackable.KeyvalueTags["unityAuthoringPosY"] = posY;

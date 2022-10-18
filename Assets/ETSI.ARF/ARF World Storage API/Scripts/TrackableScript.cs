@@ -1,8 +1,7 @@
 ﻿using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts;
 using Org.OpenAPITools.Model;
-using System;
-using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
@@ -50,7 +49,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
 
         private bool LocalTransfromHasChanged()
         {
-            if ((localPosition == transform.localPosition) && (localRotation == transform.localRotation) && (localScale == transform.localScale) )
+            if ((localPosition == transform.localPosition) && (localRotation == transform.localRotation) && (localScale == transform.localScale))
             {
                 return false;
             }

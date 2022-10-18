@@ -12,11 +12,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
     {
         public override void OnInspectorGUI()
         {
-            if (((TrackableScript)target).link != null)
-            {
-                EditorGUILayout.LabelField(((TrackableScript)target).link.ToString());
-            }
-
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Trackable : ");
 

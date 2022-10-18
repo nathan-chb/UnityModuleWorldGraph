@@ -46,11 +46,9 @@
 * 
 *****/
 #endregion License and Information
-using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System;
+using UnityEngine;
 
 namespace B83.Image.BMP
 {

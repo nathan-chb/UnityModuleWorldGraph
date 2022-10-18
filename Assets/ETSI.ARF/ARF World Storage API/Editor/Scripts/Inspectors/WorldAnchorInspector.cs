@@ -1,14 +1,15 @@
 ﻿using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
+using Dummiesman;
 using Org.OpenAPITools.Model;
+using Siccity.GLTFUtility;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
-using Siccity.GLTFUtility;
 
 namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
 {
@@ -23,18 +24,18 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
         String modelUrl;
 
         //The target object of this inspector
-        WorldAnchorScript script; 
+        WorldAnchorScript script;
 
         public void Awake()
         {
             script = ((WorldAnchorScript)target);
-            if(script.model != null)
+            if (script.model != null)
             {
                 activated = script.model.activeInHierarchy;
             }
             else
             {
-                activated = false;
+                activated = true;
             }
             modelUrl = WorldAnchorScript.GetModelUrl(script.worldAnchor);
         }
@@ -43,15 +44,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("World Anchor : ");
-
-            //PARENT LINK
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Parent Link : ");
-            if (script.link != null)
-            {
-                EditorGUILayout.LabelField(script.link.ToString());
-            }
-            EditorGUILayout.EndHorizontal();
 
             //NAME
             EditorGUILayout.BeginHorizontal();
@@ -74,7 +66,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
             {
                 if (activated)
                 {
-                    if((script.model != null) && (!script.model.activeInHierarchy))
+                    if ((script.model != null) && (!script.model.activeInHierarchy))
                     {
                         script.model.SetActive(true); ;
                     }
@@ -104,31 +96,70 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
                 {
                     DestroyImmediate(script.model);
                 }
-
                 if (modelUrl != "")
                 {
-                    EditorCoroutineUtility.StartCoroutineOwnerless(WorldAnchorScript.LoadModel(modelUrl, (UnityWebRequest req) =>
+
+                    //That's where we load the Model File, if it already extists, it's loaded from the file system, otherwise it's saved through an Importer
+
+                    //It already exsits
+                    if (File.Exists(WorldAnchorScript.GetFilePath(modelUrl)))
                     {
-                        if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
+                        if (modelUrl.EndsWith(".obj"))
                         {
-                            // Log any errors that may happen
-                            Debug.Log($"{req.error} : {req.downloadHandler.text}");
+                            // Save the model into the anchor script attribute
+                            script.model = new OBJLoader().Load(WorldAnchorScript.GetFilePath(modelUrl));
                         }
-                        else
+                        else if (modelUrl.EndsWith(".gltf"))
                         {
                             // Save the model into the anchor script attribute
                             script.model = Importer.LoadFromFile(WorldAnchorScript.GetFilePath(modelUrl));
+                        }
+                        if (script.model != null)
+                        {
                             script.model.transform.parent = script.gameObject.transform;
                             script.model.tag = "EditorOnly";
                             script.model.name = WorldAnchorScript.GetFileName(modelUrl);
-                            foreach(Transform child in script.model.transform)
+                            foreach (Transform child in script.model.transform)
                             {
                                 child.hideFlags |= HideFlags.HideInHierarchy;
                             }
                         }
-                    }));
+                    }
+                    else
+                    {
+                        EditorCoroutineUtility.StartCoroutineOwnerless(WorldAnchorScript.LoadModel(modelUrl, (UnityWebRequest req) =>
+                        {
+                            if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
+                            {
+                                // Log any errors that may happen
+                                Debug.Log($"{req.error} : {req.downloadHandler.text}");
+                            }
+                            else
+                            {
+                                if (modelUrl.EndsWith(".obj"))
+                                {
+                                    // Save the model into the anchor script attribute
+                                    script.model = new OBJLoader().Load(WorldAnchorScript.GetFilePath(modelUrl));
+                                }
+                                else if (modelUrl.EndsWith(".gltf"))
+                                {
+                                    // Save the model into the anchor script attribute
+                                    script.model = Importer.LoadFromFile(WorldAnchorScript.GetFilePath(modelUrl));
+                                }
+                                if (script != null)
+                                {
+                                    script.model.transform.parent = script.gameObject.transform;
+                                    script.model.tag = "EditorOnly";
+                                    script.model.name = WorldAnchorScript.GetFileName(modelUrl);
+                                    foreach (Transform child in script.model.transform)
+                                    {
+                                        child.hideFlags |= HideFlags.HideInHierarchy;
+                                    }
+                                }
+                            }
+                        }));
+                    }
                 }
-
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -138,7 +169,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
         {
             List<string> list;
             worldAnchor.KeyvalueTags.TryGetValue("ModelURL", out list);
-            if(list != null)
+            if (list != null)
             {
                 return list[0];
             }

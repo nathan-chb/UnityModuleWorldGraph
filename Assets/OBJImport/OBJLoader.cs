@@ -16,19 +16,19 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System;
-using Dummiesman;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace Dummiesman
 {
-    public enum SplitMode {
+    public enum SplitMode
+    {
         None,
         Object,
         Material
     }
-    
+
     public class OBJLoader
     {
         //options
@@ -52,7 +52,7 @@ namespace Dummiesman
         [MenuItem("GameObject/Import From OBJ")]
         static void ObjLoadMenu()
         {
-            string pth =  EditorUtility.OpenFilePanel("Import OBJ", "", "obj");
+            string pth = EditorUtility.OpenFilePanel("Import OBJ", "", "obj");
             if (!string.IsNullOrEmpty(pth))
             {
                 System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
@@ -125,60 +125,66 @@ namespace Dummiesman
             //create default object
             setCurrentObjectFunc.Invoke("default");
 
-			//var buffer = new DoubleBuffer(reader, 256 * 1024);
-			var buffer = new CharWordReader(reader, 4 * 1024);
+            //var buffer = new DoubleBuffer(reader, 256 * 1024);
+            var buffer = new CharWordReader(reader, 4 * 1024);
 
-			//do the reading
-			while (true)
+            //do the reading
+            while (true)
             {
-				buffer.SkipWhitespaces();
+                buffer.SkipWhitespaces();
 
-				if (buffer.endReached == true) {
-					break;
-				}
+                if (buffer.endReached == true)
+                {
+                    break;
+                }
 
-				buffer.ReadUntilWhiteSpace();
-				
+                buffer.ReadUntilWhiteSpace();
+
                 //comment or blank
                 if (buffer.Is("#"))
                 {
-					buffer.SkipUntilNewLine();
+                    buffer.SkipUntilNewLine();
                     continue;
                 }
-				
-				if (Materials == null && buffer.Is("mtllib")) {
-					buffer.SkipWhitespaces();
-					buffer.ReadUntilNewLine();
-					string mtlLibPath = buffer.GetString();
-					LoadMaterialLibrary(mtlLibPath);
-					continue;
-				}
-				
-				if (buffer.Is("v")) {
-					Vertices.Add(buffer.ReadVector());
-					continue;
-				}
 
-				//normal
-				if (buffer.Is("vn")) {
+                if (Materials == null && buffer.Is("mtllib"))
+                {
+                    buffer.SkipWhitespaces();
+                    buffer.ReadUntilNewLine();
+                    string mtlLibPath = buffer.GetString();
+                    LoadMaterialLibrary(mtlLibPath);
+                    continue;
+                }
+
+                if (buffer.Is("v"))
+                {
+                    Vertices.Add(buffer.ReadVector());
+                    continue;
+                }
+
+                //normal
+                if (buffer.Is("vn"))
+                {
                     Normals.Add(buffer.ReadVector());
                     continue;
                 }
 
                 //uv
-				if (buffer.Is("vt")) {
+                if (buffer.Is("vt"))
+                {
                     UVs.Add(buffer.ReadVector());
                     continue;
                 }
 
                 //new material
-				if (buffer.Is("usemtl")) {
-					buffer.SkipWhitespaces();
-					buffer.ReadUntilNewLine();
-					string materialName = buffer.GetString();
+                if (buffer.Is("usemtl"))
+                {
+                    buffer.SkipWhitespaces();
+                    buffer.ReadUntilNewLine();
+                    string materialName = buffer.GetString();
                     currentMaterial = materialName;
 
-                    if(SplitMode == SplitMode.Material)
+                    if (SplitMode == SplitMode.Material)
                     {
                         setCurrentObjectFunc.Invoke(materialName);
                     }
@@ -186,7 +192,8 @@ namespace Dummiesman
                 }
 
                 //new object
-                if ((buffer.Is("o") || buffer.Is("g")) && SplitMode == SplitMode.Object) {
+                if ((buffer.Is("o") || buffer.Is("g")) && SplitMode == SplitMode.Object)
+                {
                     buffer.ReadUntilNewLine();
                     string objectName = buffer.GetString(1);
                     setCurrentObjectFunc.Invoke(objectName);
@@ -199,27 +206,31 @@ namespace Dummiesman
                     //loop through indices
                     while (true)
                     {
-						bool newLinePassed;
-						buffer.SkipWhitespaces(out newLinePassed);
-						if (newLinePassed == true) {
-							break;
-						}
+                        bool newLinePassed;
+                        buffer.SkipWhitespaces(out newLinePassed);
+                        if (newLinePassed == true)
+                        {
+                            break;
+                        }
 
                         int vertexIndex = int.MinValue;
                         int normalIndex = int.MinValue;
                         int uvIndex = int.MinValue;
 
-						vertexIndex = buffer.ReadInt();
-						if (buffer.currentChar == '/') {
-							buffer.MoveNext();
-							if (buffer.currentChar != '/') {
-								uvIndex = buffer.ReadInt();
-							}
-							if (buffer.currentChar == '/') {
-								buffer.MoveNext();
-								normalIndex = buffer.ReadInt();
-							}
-						}
+                        vertexIndex = buffer.ReadInt();
+                        if (buffer.currentChar == '/')
+                        {
+                            buffer.MoveNext();
+                            if (buffer.currentChar != '/')
+                            {
+                                uvIndex = buffer.ReadInt();
+                            }
+                            if (buffer.currentChar == '/')
+                            {
+                                buffer.MoveNext();
+                                normalIndex = buffer.ReadInt();
+                            }
+                        }
 
                         //"postprocess" indices
                         if (vertexIndex > int.MinValue)
@@ -255,10 +266,10 @@ namespace Dummiesman
                     normalIndices.Clear();
                     uvIndices.Clear();
 
-					continue;
+                    continue;
                 }
 
-				buffer.SkipUntilNewLine();
+                buffer.SkipUntilNewLine();
             }
 
             //finally, put it all together

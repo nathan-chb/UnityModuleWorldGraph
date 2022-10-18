@@ -625,10 +625,14 @@ namespace ETSI.ARF.WorldStorage.UI
                     //POST WORLDANCHOR
                     if (node is ARFNodeWorldAnchor aRFNodeWorldAnchor)
                     {
-                        var posX = new List<String>();
-                        posX.Add(aRFNodeWorldAnchor.GetPosition().x.ToString());
-                        var posY = new List<String>();
-                        posY.Add(aRFNodeWorldAnchor.GetPosition().y.ToString());
+                        var posX = new List<String>
+                        {
+                            aRFNodeWorldAnchor.GetPosition().x.ToString()
+                        };
+                        var posY = new List<String>
+                        {
+                            aRFNodeWorldAnchor.GetPosition().y.ToString()
+                        };
                         WorldAnchor worldAnchor = aRFNodeWorldAnchor.worldAnchor;
                         worldAnchor.KeyvalueTags["unityAuthoringPosX"] = posX;
                         worldAnchor.KeyvalueTags["unityAuthoringPosY"] = posY;
@@ -661,10 +665,14 @@ namespace ETSI.ARF.WorldStorage.UI
                     {
                         if(node is ARFNodeTrackable aRFNodeTrackable)
                         {
-                            var posX = new List<String>();
-                            posX.Add(aRFNodeTrackable.GetPosition().x.ToString());
-                            var posY = new List<String>();
-                            posY.Add(aRFNodeTrackable.GetPosition().y.ToString());
+                            var posX = new List<String>
+                            {
+                                aRFNodeTrackable.GetPosition().x.ToString()
+                            };
+                            var posY = new List<String>
+                            {
+                                aRFNodeTrackable.GetPosition().y.ToString()
+                            };
                             Trackable trackable = aRFNodeTrackable.trackable;
                             trackable.KeyvalueTags["unityAuthoringPosX"] = posX;
                             trackable.KeyvalueTags["unityAuthoringPosY"] = posY;
@@ -673,10 +681,14 @@ namespace ETSI.ARF.WorldStorage.UI
                         }
                         if (node is ARFNodeWorldAnchor aRFNodeWorldAnchor)
                         {
-                            var posX = new List<String>();
-                            posX.Add(aRFNodeWorldAnchor.GetPosition().x.ToString());
-                            var posY = new List<String>();
-                            posY.Add(aRFNodeWorldAnchor.GetPosition().y.ToString());
+                            var posX = new List<String>
+                            {
+                                aRFNodeWorldAnchor.GetPosition().x.ToString()
+                            };
+                            var posY = new List<String>
+                            {
+                                aRFNodeWorldAnchor.GetPosition().y.ToString()
+                            };
                             WorldAnchor worldAnchor = aRFNodeWorldAnchor.worldAnchor;
                             worldAnchor.KeyvalueTags["unityAuthoringPosX"] = posX;
                             worldAnchor.KeyvalueTags["unityAuthoringPosY"] = posY;

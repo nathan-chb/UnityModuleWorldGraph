@@ -38,20 +38,25 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         public WorldStorageServer worldStorageServer;
         [HideInInspector] public WorldStorageUser worldStorageUser;
 
+        public static bool IsOpen
+        {
+            get { return HasOpenInstances<WorldGraphWindow>(); }
+        }
+
+
         private ARFGraphView myGraph;
 
         //to delay the reframe (otherwise it reframes when the graph isn't built yet)
         int twoFrames = 0;
         public static WorldGraphWindow Instance
         {
-            get { return GetWindow<WorldGraphWindow>(); }
+            get { return GetWindow<WorldGraphWindow>("Graph Editor", true, typeof(SceneView)); }
         }
 
         [MenuItem("ARFWorldStorage/Edit Graph...")]
         public static void ShowWindow()
         {
             var window = GetWindow<WorldGraphWindow>("Graph Editor", true, typeof(SceneView));
-            Debug.Log(AdminRequest.Ping(window.worldStorageServer));
             window.Show();
         }
 
@@ -79,6 +84,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             }
         }
 
+
         //initiate the graphView Attribute 
         public void ConstructGraphView()
         {
@@ -98,7 +104,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
 
         void OnGUI()
         {
-            if (UtilGraphSingleton.instance.nodePositions == null)
+            if ((UtilGraphSingleton.instance.nodePositions == null) && (worldStorageServer != null) && (worldStorageUser != null))
             {
                 UtilGraphSingleton.instance.InitNodePos(worldStorageServer, worldStorageUser);
             }

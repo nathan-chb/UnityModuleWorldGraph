@@ -1,9 +1,12 @@
 ﻿using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts;
+using Dummiesman;
 using Org.OpenAPITools.Model;
 using Siccity.GLTFUtility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -23,17 +26,24 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
                 string modelUrl = WorldAnchorScript.GetModelUrl(_worldAnchor);
                 if ((modelUrl != "") && (model == null))
                 {
-                    StartCoroutine(LoadModel(modelUrl, (UnityWebRequest req) =>
+
+                    //That's where we load the Model File, if it already extists, it's loaded from the file system, otherwise it's saved through an Importer
+
+                    //It already exsits
+                    if (File.Exists(GetFilePath(modelUrl)))
                     {
-                        if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
+                        if (modelUrl.EndsWith(".obj"))
                         {
-                            // Log any errors that may happen
-                            Debug.Log($"{req.error} : {req.downloadHandler.text}");
+                            // Save the model into the anchor script attribute
+                            model = new OBJLoader().Load(GetFilePath(modelUrl));
                         }
-                        else
+                        else if (modelUrl.EndsWith(".gltf"))
                         {
                             // Save the model into the anchor script attribute
                             model = Importer.LoadFromFile(GetFilePath(modelUrl));
+                        }
+                        if (model != null)
+                        {
                             model.transform.parent = gameObject.transform;
                             model.tag = "EditorOnly";
                             model.name = GetFileName(modelUrl);
@@ -42,7 +52,42 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
                                 child.hideFlags |= HideFlags.HideInHierarchy;
                             }
                         }
-                    }));
+                    }
+                    else
+                    //It does not exist
+                    {
+                        StartCoroutine(LoadModel(modelUrl, (UnityWebRequest req) =>
+                        {
+                            if ((req.result == UnityWebRequest.Result.ConnectionError) || (req.result == UnityWebRequest.Result.ProtocolError))
+                            {
+                                // Log any errors that may happen
+                                Debug.Log($"{req.error} : {req.downloadHandler.text}");
+                            }
+                            else
+                            {
+                                if (modelUrl.EndsWith(".obj"))
+                                {
+                                    // Save the model into the anchor script attribute
+                                    model = new OBJLoader().Load(GetFilePath(modelUrl));
+                                }
+                                else if (modelUrl.EndsWith(".gltf"))
+                                {
+                                    // Save the model into the anchor script attribute
+                                    model = Importer.LoadFromFile(GetFilePath(modelUrl));
+                                }
+                                if (model != null)
+                                {
+                                    model.transform.parent = gameObject.transform;
+                                    model.tag = "EditorOnly";
+                                    model.name = GetFileName(modelUrl);
+                                    foreach (Transform child in model.transform)
+                                    {
+                                        child.hideFlags |= HideFlags.HideInHierarchy;
+                                    }
+                                }
+                            }
+                        }));
+                    }
                 }
             }
         }
@@ -82,6 +127,15 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
                 localRotation = transform.localRotation;
                 localScale = transform.localScale;
             }
+
+            //hide the model child elements in the hierarchy
+            if (model != null)
+            {
+                foreach (Transform child in model.transform)
+                {
+                    child.hideFlags = HideFlags.HideInHierarchy;
+                }
+            }
         }
 
         private bool LocalTransfromHasChanged()
@@ -98,7 +152,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
 
         public void GameObjectToLinkTransform()
         {
-            if(transform.parent != null)
+            if (transform.parent != null)
             {
                 //get the positions relative to the parent
                 Vector3 position = transform.localPosition;

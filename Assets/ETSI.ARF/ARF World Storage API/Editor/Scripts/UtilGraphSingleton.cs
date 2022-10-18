@@ -56,8 +56,23 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             {
                 if (track.KeyvalueTags.ContainsKey("unityAuthoringPosX") && track.KeyvalueTags.ContainsKey("unityAuthoringPosY"))
                 {
-                    var posX = RoundToNearestHalf(float.Parse(track.KeyvalueTags["unityAuthoringPosX"][0]));
-                    var posY = RoundToNearestHalf(float.Parse(track.KeyvalueTags["unityAuthoringPosY"][0]));
+
+                    float posY = 0;
+                    float posX = 0;
+                    //Debug.Log(track.Name + " : Hard written X : " + track.KeyvalueTags["unityAuthoringPosX"][0]);
+                    if (float.TryParse(track.KeyvalueTags["unityAuthoringPosX"][0], out var parseX))
+                    {
+                        //Debug.Log(track.Name + " : Parsed X : " + parseX);
+                        posX = RoundToNearestHalf(parseX);
+                        //Debug.Log(track.Name + " : Rounded X : " + posX);
+                    }
+                    //Debug.Log(track.Name + " : Hard written Y : " + track.KeyvalueTags["unityAuthoringPosY"][0]);
+                    if (float.TryParse(track.KeyvalueTags["unityAuthoringPosY"][0], out var parseY))
+                    {
+                        //Debug.Log(track.Name + " : Parsed Y : " + parseY);
+                        posY = RoundToNearestHalf(parseY);
+                        //Debug.Log(track.Name + " : Rounded Y : " + posY);
+                    }
                     Rect trackPos = new(posX, posY, 135, 77);
                     instance.nodePositions[track.UUID.ToString()] = trackPos;
                 }
@@ -71,8 +86,23 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             {
                 if (wa.KeyvalueTags.ContainsKey("unityAuthoringPosX") && wa.KeyvalueTags.ContainsKey("unityAuthoringPosY"))
                 {
-                    var posX = RoundToNearestHalf(float.Parse(wa.KeyvalueTags["unityAuthoringPosX"][0]));
-                    var posY = RoundToNearestHalf(float.Parse(wa.KeyvalueTags["unityAuthoringPosY"][0]));
+
+                    float posY = 0;
+                    float posX = 0;
+                    //Debug.Log(wa.Name + " : Hard written X : " + wa.KeyvalueTags["unityAuthoringPosX"][0]);
+                    if (float.TryParse(wa.KeyvalueTags["unityAuthoringPosX"][0], out var parseX))
+                    {
+                        //Debug.Log(wa.Name + " : Parsed Y : " + parseX);
+                        posX = RoundToNearestHalf(parseX);
+                        //Debug.Log(wa.Name + " : Rounded Y : " + posX);
+                    }
+                    //Debug.Log(wa.Name + " : Hard written Y : " + wa.KeyvalueTags["unityAuthoringPosX"][0]);
+                    if (float.TryParse(wa.KeyvalueTags["unityAuthoringPosY"][0], out var parseY))
+                    {
+                        //Debug.Log(wa.Name + " : Parsed Y : " + parseX);
+                        posY = RoundToNearestHalf(parseY);
+                        //Debug.Log(wa.Name + " : Rounded Y : " + posX);
+                    }
                     Rect waPos = new(posX, posY, 135, 77);
                     instance.nodePositions[wa.UUID.ToString()] = waPos;
                 }
@@ -96,14 +126,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         //method to predict the position of a node (the float that will be saved in the PositionInfo singleton)
         public static float RoundToNearestHalf(float a)
         {
-            return a = Mathf.Round(a * 2f) * 0.5f;
-        }
-
-        public static void PrintInfo()
-        {
-            Debug.Log("elems to delete : " + string.Join(", ", instance.elemsToRemove.Keys));
-            Debug.Log("elems to update : " + string.Join(", ", instance.elemsToUpdate));
-            Debug.Log("elems tout court : " + string.Join(", ", instance.nodePositions.Keys));
+            return _ = Mathf.Round(a * 2f) * 0.5f;
         }
 
         public static void SynchronizeWithGameObjects(ARFGraphView graph)

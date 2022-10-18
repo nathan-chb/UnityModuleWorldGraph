@@ -179,16 +179,14 @@ public class SceneBuilder : MonoBehaviour
                 go.transform.parent = parent.transform;
             }
 
+            go.transform.localScale = transform.lossyScale;
+            go.transform.rotation = transform.rotation;
+            go.transform.position = transform.GetPosition();
             //hide the prefab elements in the hierarchy
             foreach (Transform child in go.transform)
             {
                 child.hideFlags = HideFlags.HideInHierarchy;
             }
-
-            go.transform.localScale = transform.lossyScale;
-            go.transform.rotation = transform.rotation;
-            go.transform.position = transform.GetPosition();
-
             var trackScript = (TrackableScript)go.GetComponent<TrackableScript>();
             trackScript.trackable = trackable;
             trackScript.link = parentLink;
@@ -204,6 +202,11 @@ public class SceneBuilder : MonoBehaviour
             prefab.transform.localScale = transform.lossyScale;
             prefab.transform.rotation = transform.rotation;
             prefab.transform.position = transform.GetPosition();
+            //hide the prefab elements in the hierarchy
+            foreach (Transform child in prefab.transform)
+            {
+                child.hideFlags = HideFlags.HideInHierarchy;
+            }
             var myComponent = (TrackableScript)prefab.GetComponent<TrackableScript>();
             myComponent.trackable = trackable;
             myComponent.link = parentLink;
@@ -224,13 +227,14 @@ public class SceneBuilder : MonoBehaviour
             {
                 go.transform.parent = parent.transform;
             }
+            go.transform.localScale = transform.lossyScale;
+            go.transform.rotation = transform.rotation;
+            go.transform.position = transform.GetPosition();
+            //hide the child elements in the hierarchy
             foreach (Transform child in go.transform)
             {
                 child.hideFlags = HideFlags.HideInHierarchy;
             }
-            go.transform.localScale = transform.lossyScale;
-            go.transform.rotation = transform.rotation;
-            go.transform.position = transform.GetPosition();
             var myComponent = (WorldAnchorScript)go.GetComponent<WorldAnchorScript>();
             myComponent.worldAnchor = worldAnchor;
             myComponent.link = parentLink;
@@ -246,6 +250,11 @@ public class SceneBuilder : MonoBehaviour
             prefab.transform.localScale = transform.lossyScale;
             prefab.transform.rotation = transform.rotation;
             prefab.transform.position = transform.GetPosition();
+            //hide the child elements in the hierarchy
+            foreach (Transform child in prefab.transform)
+            {
+                child.hideFlags = HideFlags.HideInHierarchy;
+            }
             var myComponent = (WorldAnchorScript)prefab.GetComponent<WorldAnchorScript>();
             myComponent.worldAnchor = worldAnchor;
             myComponent.link = parentLink;
@@ -389,11 +398,6 @@ public class SceneBuilder : MonoBehaviour
 
         //create the new gameObject
         GameObject newGameObject = (GameObject)PrefabUtility.InstantiatePrefab(prefab as GameObject);
-        //hide the prefab elements in the hierarchy
-        foreach (Transform child in newGameObject.transform)
-        {
-            child.hideFlags = HideFlags.HideInHierarchy;
-        }
         var newTrackScript = (TrackableScript)newGameObject.GetComponent<TrackableScript>();
 
         //give it all its attributes

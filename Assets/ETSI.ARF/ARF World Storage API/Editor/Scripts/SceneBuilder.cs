@@ -15,14 +15,9 @@ using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts;
 
 public class SceneBuilder : MonoBehaviour
 {
-    // Reference to the Prefab. Drag a Prefab into this field in the Inspector.
-    public GameObject myPrefab;
-
-
     // Start is called before the first frame update
     void Start()
     {
-
     }
 
     public static void InstantiateGraph(ARFGraphView graphview)
@@ -64,13 +59,13 @@ public class SceneBuilder : MonoBehaviour
         //check if root is WA or Trackable
         //create the root GO
         GameObject newGameObject;
-        if (root is ARFNodeTrackable)
+        if (root is ARFNodeTrackable trackableNode)
         {
-            newGameObject = InstantiateTrackableGO(((ARFNodeTrackable)root).trackable, parentLink, transform, parent);
+            newGameObject = InstantiateTrackableGO(trackableNode.trackable, parentLink, transform, parent);
         }
-        else if(root is ARFNodeWorldAnchor)
+        else if(root is ARFNodeWorldAnchor anchorNode)
         {
-            newGameObject = InstantiateWorldAnchorGO(((ARFNodeWorldAnchor)root).worldAnchor, parentLink, transform, parent);
+            newGameObject = InstantiateWorldAnchorGO(anchorNode.worldAnchor, parentLink, transform, parent);
         }
         else
         {
@@ -90,7 +85,6 @@ public class SceneBuilder : MonoBehaviour
             edgeTransfrom.m10 = wl.Transform[4]; edgeTransfrom.m11 = wl.Transform[5]; edgeTransfrom.m12 = wl.Transform[6]; edgeTransfrom.m13 = wl.Transform[7];
             edgeTransfrom.m20 = wl.Transform[8]; edgeTransfrom.m21 = wl.Transform[9]; edgeTransfrom.m22 = wl.Transform[10]; edgeTransfrom.m23 = wl.Transform[11];
             edgeTransfrom.m30 = wl.Transform[12]; edgeTransfrom.m31 = wl.Transform[13]; edgeTransfrom.m32 = wl.Transform[14]; edgeTransfrom.m33 = wl.Transform[15];
-
 
             //add it to the one in arg
             Vector3 position = transform.ExtractPosition() + edgeTransfrom.ExtractPosition();

@@ -59,6 +59,15 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
             }
         }
 
+        void OnDrawGizmos()
+        {
+            if (link != null)
+            {
+                Gizmos.color = new Color(0.66f, 0.39f, 1, 0.77f);
+                Gizmos.DrawLine(transform.position, transform.parent.position);
+            }
+        }
+
         public void GameObjectToLinkTransform()
         {
             if (transform.parent != null)

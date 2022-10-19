@@ -578,7 +578,6 @@ namespace ETSI.ARF.WorldStorage.UI
                         TrackableRequest.DeleteTrackable(worldStorageServer, elemToRemove.Key);
                         break;
                     case nameof(WorldAnchor):
-                        Debug.Log("delete worldanchor");
                         WorldAnchorRequest.DeleteWorldAnchor(worldStorageServer, elemToRemove.Key);
                         break;
                     case nameof(WorldLink):

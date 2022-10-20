@@ -93,7 +93,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
             //mark the son's GameObject as not modified
             string nodeName = this.input.node.title;
             var go = GameObject.Find(nodeName);
-            if(go != null)
+            if (go != null)
             {
                 var worldAnchorScript = (WorldAnchorScript)go.GetComponent<WorldAnchorScript>();
                 var trackableScript = (TrackableScript)go.GetComponent<TrackableScript>();

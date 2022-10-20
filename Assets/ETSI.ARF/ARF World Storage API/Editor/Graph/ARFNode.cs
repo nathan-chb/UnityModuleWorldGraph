@@ -33,7 +33,6 @@ using UnityEditor.Experimental.GraphView;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph;
 using System;
 using UnityEngine;
-using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
 
 namespace ETSI.ARF.WorldStorage.UI
 {
@@ -107,7 +106,7 @@ namespace ETSI.ARF.WorldStorage.UI
         public abstract ObjectType GetElemType();
         public void MarkUnsaved()
         {
-            if(savedIcon == null)
+            if (savedIcon == null)
             {
                 //the icon to add if the node does not correspond to an element in the server
                 Texture2D warningImage = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Images/cloud.png", typeof(Texture2D));
@@ -127,7 +126,7 @@ namespace ETSI.ARF.WorldStorage.UI
             }
             if (!titleContainer.Contains(savedIcon))
             {
-                titleContainer.Insert(0,savedIcon);
+                titleContainer.Insert(0, savedIcon);
             }
             tooltip = "This element is not synchronized with the World Storage";
         }

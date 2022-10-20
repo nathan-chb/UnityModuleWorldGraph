@@ -1,17 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using UnityEditor;
-using UnityEngine;
-using ETSI.ARF.WorldStorage.UI;
-using Org.OpenAPITools.Model;
-using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
-using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
-using UnityEditor.Experimental.GraphView;
-using System.Linq;
-using System;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts;
+using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
+using ETSI.ARF.WorldStorage.UI;
+using Org.OpenAPITools.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Experimental.GraphView;
+using UnityEngine;
 
 public class SceneBuilder : MonoBehaviour
 {
@@ -42,7 +39,7 @@ public class SceneBuilder : MonoBehaviour
     internal static void PutAtTop(ARFNode node)
     {
         var gameObject = GameObject.Find(node.title);
-        if(gameObject != null)
+        if (gameObject != null)
         {
             gameObject.transform.parent = null;
         }
@@ -63,7 +60,7 @@ public class SceneBuilder : MonoBehaviour
         {
             newGameObject = InstantiateTrackableGO(trackableNode.trackable, parentLink, transform, parent);
         }
-        else if(root is ARFNodeWorldAnchor anchorNode)
+        else if (root is ARFNodeWorldAnchor anchorNode)
         {
             newGameObject = InstantiateWorldAnchorGO(anchorNode.worldAnchor, parentLink, transform, parent);
         }
@@ -89,7 +86,7 @@ public class SceneBuilder : MonoBehaviour
             //add it to the one in arg
             Vector3 position = transform.ExtractPosition() + edgeTransfrom.ExtractPosition();
             Quaternion rotation = transform.ExtractRotation() * edgeTransfrom.ExtractRotation();
-            Vector3 scale = Vector3.Scale(transform.ExtractScale(), edgeTransfrom.ExtractScale()) ;
+            Vector3 scale = Vector3.Scale(transform.ExtractScale(), edgeTransfrom.ExtractScale());
 
             //create the matrix after 
             var matrix = Matrix4x4.TRS(position, rotation, scale);
@@ -144,7 +141,7 @@ public class SceneBuilder : MonoBehaviour
     public static GameObject InstantiateTrackableGO(Trackable trackable, WorldLink parentLink, Matrix4x4 transform, GameObject parent)
     {
         GameObject prefab = GameObject.Find(trackable.Name);
-        if(prefab == null)
+        if (prefab == null)
         {
             //Create the visual of the trackable gameObject
             switch (trackable.TrackableType)
@@ -205,7 +202,7 @@ public class SceneBuilder : MonoBehaviour
             myComponent.trackable = trackable;
             myComponent.link = parentLink;
             return prefab;
-        }       
+        }
     }
 
     //Method to generate a gameObject from a WorldAnchor
@@ -217,7 +214,7 @@ public class SceneBuilder : MonoBehaviour
             prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFWorldAnchor.prefab", typeof(GameObject));
             GameObject go = (GameObject)PrefabUtility.InstantiatePrefab(prefab as GameObject);
             go.name = worldAnchor.Name;
-            if(parent != null)
+            if (parent != null)
             {
                 go.transform.parent = parent.transform;
             }
@@ -292,7 +289,7 @@ public class SceneBuilder : MonoBehaviour
         UnityEngine.Object trackablePrefabOther = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackableOther.prefab", typeof(GameObject));
         UnityEngine.Object trackablePrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFTrackable.prefab", typeof(GameObject));
         UnityEngine.Object worldAnchorPrefab = AssetDatabase.LoadAssetAtPath("Assets/ETSI.ARF/ARF World Storage API/Prefabs/ARFWorldAnchor.prefab", typeof(GameObject));
-        List<GameObject> result = new List<GameObject>(); 
+        List<GameObject> result = new List<GameObject>();
         foreach (Transform transform in parent.transform)
         {
             var GO = transform.gameObject;

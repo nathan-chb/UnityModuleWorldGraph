@@ -1,7 +1,6 @@
 ﻿using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts;
 using Org.OpenAPITools.Model;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
@@ -56,15 +55,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
             else
             {
                 return true;
-            }
-        }
-
-        void OnDrawGizmos()
-        {
-            if (link != null)
-            {
-                Gizmos.color = new Color(0.66f, 0.39f, 1, 0.77f);
-                Gizmos.DrawLine(transform.position, transform.parent.position);
             }
         }
 

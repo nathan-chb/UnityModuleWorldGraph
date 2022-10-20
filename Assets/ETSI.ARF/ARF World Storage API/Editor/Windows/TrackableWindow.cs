@@ -21,7 +21,6 @@
 #define USING_OPENAPI_GENERATOR // alt. is Swagger
 #define isDEBUG
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -30,7 +29,6 @@ using ETSI.ARF.WorldStorage.REST;
 using System;
 
 #if USING_OPENAPI_GENERATOR
-using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
 #else
 using IO.Swagger.Api;
@@ -270,7 +268,7 @@ namespace ETSI.ARF.WorldStorage.UI
 
             if (obj.LocalCRS.Count == 16)
             {
-                Matrix4x4 localCRS = WorldStorageWindow.MatrixFromLocalCRS(obj.LocalCRS); 
+                Matrix4x4 localCRS = WorldStorageWindow.MatrixFromLocalCRS(obj.LocalCRS);
                 localCRS_pos = localCRS.GetPosition();
                 localCRS_rot = localCRS.rotation.eulerAngles;
             }
@@ -284,7 +282,7 @@ namespace ETSI.ARF.WorldStorage.UI
             var first = WorldStorageWindow.GetFirstKeyValueTags(obj.KeyvalueTags);
             key1 = first.Item1;
             value1 = first.Item2;
-           
+
             this.Repaint();
         }
 

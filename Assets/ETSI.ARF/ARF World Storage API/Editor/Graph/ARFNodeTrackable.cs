@@ -31,7 +31,6 @@ using IO.Swagger.Model;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
-using UnityEditor;
 
 namespace ETSI.ARF.WorldStorage.UI
 {
@@ -53,7 +52,7 @@ namespace ETSI.ARF.WorldStorage.UI
             colorRectangle.style.backgroundColor = new Color(1, 0.31f, 0.31f, 0.9f);
             //get the index of the title container
             int titleIndex = mainContainer.hierarchy.IndexOf(titleContainer);
-            mainContainer.Insert(titleIndex+1, colorRectangle);
+            mainContainer.Insert(titleIndex + 1, colorRectangle);
 
             /*PORTS*/
             var portIn = GeneratePort(this, Direction.Input, Port.Capacity.Single);

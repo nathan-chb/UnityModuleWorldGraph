@@ -178,5 +178,14 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
                 return null;
             }
         }
+
+        [DrawGizmo(GizmoType.Selected | GizmoType.NonSelected)]
+        static void DrawGizmoForMyScript(WorldAnchorScript myScript, GizmoType gizmoType)
+        {
+            if (myScript.link != null)
+            {
+                Gizmos.DrawLine(myScript.transform.position, myScript.transform.parent.position);
+            }
+        }
     }
 }

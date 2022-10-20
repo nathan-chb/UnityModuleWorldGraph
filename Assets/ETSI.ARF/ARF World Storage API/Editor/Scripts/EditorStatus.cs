@@ -43,7 +43,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts
             if (WorldGraphWindow.IsOpen)
             {
                 var graphView = WorldGraphWindow.Instance.GetGraph();
-                if(graphView != null)
+                if (graphView != null)
                 {
                     SceneBuilder.InstantiateGraph(graphView);
                 }

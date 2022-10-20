@@ -19,12 +19,12 @@
 //
 
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph;
+using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 using ETSI.ARF.WorldStorage.REST;
 using ETSI.ARF.WorldStorage.UI;
 using Org.OpenAPITools.Model;
 using System;
 using System.Collections.Generic;
-using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 using UnityEditor;
 using UnityEngine;
 
@@ -264,7 +264,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 GUILayout.Box(anchorImage, GUILayout.Width(40), GUILayout.Height(40));
 
                 //anchor label
-                EditorGUILayout.BeginVertical(GUILayout.Height(50)); 
+                EditorGUILayout.BeginVertical(GUILayout.Height(50));
                 GUILayout.FlexibleSpace();
                 EditorGUILayout.LabelField("WORLD ANCHOR", EditorStyles.boldLabel);
                 GUILayout.FlexibleSpace();
@@ -592,7 +592,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         uuid = uuid.Replace("\"", "");
                         foreach (ARFEdgeLink edge in worldAnchorNode.portIn.connections)
                         {
-                        edge.worldLink.UUIDTo = Guid.Parse(uuid);
+                            edge.worldLink.UUIDTo = Guid.Parse(uuid);
                         }
                         foreach (ARFEdgeLink edge in worldAnchorNode.portOut.connections)
                         {
@@ -632,7 +632,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     localCRS.m10 = winSingleton.trackable.LocalCRS[4]; localCRS.m11 = winSingleton.trackable.LocalCRS[5]; localCRS.m12 = winSingleton.trackable.LocalCRS[6]; localCRS.m13 = winSingleton.trackable.LocalCRS[7];
                     localCRS.m20 = winSingleton.trackable.LocalCRS[8]; localCRS.m21 = winSingleton.trackable.LocalCRS[9]; localCRS.m22 = winSingleton.trackable.LocalCRS[10]; localCRS.m23 = winSingleton.trackable.LocalCRS[11];
                     localCRS.m30 = winSingleton.trackable.LocalCRS[12]; localCRS.m31 = winSingleton.trackable.LocalCRS[13]; localCRS.m32 = winSingleton.trackable.LocalCRS[14]; localCRS.m33 = winSingleton.trackable.LocalCRS[15];
-                    if((winSingleton.local_pos != localCRS.GetPosition()) || (winSingleton.local_rot != localCRS.rotation.eulerAngles))
+                    if ((winSingleton.local_pos != localCRS.GetPosition()) || (winSingleton.local_rot != localCRS.rotation.eulerAngles))
                     {
                         winSingleton.local_pos = localCRS.GetPosition();
                         winSingleton.local_rot = localCRS.rotation.eulerAngles;
@@ -788,7 +788,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 float floatVersion;
                 if (trackable.TrackableEncodingInformation._Version != null)
                 {
-                    floatVersion = EditorGUILayout.DelayedFloatField(float.Parse(trackable.TrackableEncodingInformation._Version.Replace(".",",")));
+                    floatVersion = EditorGUILayout.DelayedFloatField(float.Parse(trackable.TrackableEncodingInformation._Version.Replace(".", ",")));
                 }
                 else
                 {
@@ -1397,9 +1397,9 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 GUI.backgroundColor = Color.green;
                 if (GUILayout.Button("Save"))
                 {
-                        //if one of the connected elements is not in the server, you can't save the link
+                    //if one of the connected elements is not in the server, you can't save the link
                     if ((UtilGraphSingleton.instance.nodePositions.ContainsKey(worldLink.UUIDTo.ToString()) && UtilGraphSingleton.instance.nodePositions.ContainsKey(worldLink.UUIDFrom.ToString())))
-                    { 
+                    {
                         if (UtilGraphSingleton.instance.linkIds.Contains(worldLink.UUID.ToString()))
                         {
                             if (UtilGraphSingleton.instance.elemsToUpdate.Contains(worldLink.UUID.ToString()))
@@ -1437,10 +1437,10 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         public static void DrawUILine(Color color, int thickness = 2, int padding = 10)
         {
             Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding + thickness));
-                r.height = thickness;
-            r.y += padding/2;
-            r.x-=2;
-            r.width +=6;
+            r.height = thickness;
+            r.y += padding / 2;
+            r.x -= 2;
+            r.width += 6;
             EditorGUI.DrawRect(r, color);
         }
     }

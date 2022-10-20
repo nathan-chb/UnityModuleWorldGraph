@@ -21,15 +21,12 @@
 #define USING_OPENAPI_GENERATOR // alt. is Swagger
 #define isDEBUG
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using ETSI.ARF.WorldStorage;
 using ETSI.ARF.WorldStorage.REST;
 
 #if USING_OPENAPI_GENERATOR
-using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
 #else
 using IO.Swagger.Api;
@@ -64,7 +61,7 @@ namespace ETSI.ARF.WorldStorage.UI
         private bool showListT = true;
         private bool showListA = true;
         private bool showListL = true;
-        
+
         private string filterByKeyValueTag = "";
 
         static public string winName = "ARF Authoring Editor";
@@ -473,7 +470,7 @@ namespace ETSI.ARF.WorldStorage.UI
                     if (GUILayout.Button("Edit...", EditorStyles.miniButtonLeft, buttonWidth))
                     {
                         Debug.Log("Open Link Window");
-                        
+
                         WorldLinkWindow.ShowWindow(worldStorageServer, worldStorageUser, UUID);
                     }
 

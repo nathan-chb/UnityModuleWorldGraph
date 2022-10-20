@@ -1,7 +1,5 @@
 ﻿using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
-using Org.OpenAPITools.Model;
-using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,6 +8,15 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
     [CustomEditor(typeof(TrackableScript))]
     public class TrackableInspector : UnityEditor.Editor
     {
+
+        //The target object of this inspector
+        TrackableScript script;
+
+        public void Awake()
+        {
+            script = ((TrackableScript)target);
+        }
+
         public override void OnInspectorGUI()
         {
             EditorGUILayout.Space();
@@ -36,6 +43,15 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Scripts.Inspectors
                 EditorGUILayout.LabelField("No UUID yet (not yet saved in the server");
             }
             EditorGUILayout.EndHorizontal();
+        }
+
+        [DrawGizmo(GizmoType.Selected | GizmoType.NonSelected)]
+        static void DrawGizmoForMyScript(TrackableScript myScript, GizmoType gizmoType)
+        {
+            if (myScript.link != null)
+            {
+                Gizmos.DrawLine(myScript.transform.position, myScript.transform.parent.position);
+            }
         }
 
     }

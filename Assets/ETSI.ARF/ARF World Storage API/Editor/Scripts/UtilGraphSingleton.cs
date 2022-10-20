@@ -37,7 +37,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
         public Dictionary<String, Rect> nodePositions;
         public List<String> linkIds;
 
-        public Dictionary<String,Type> elemsToRemove;
+        public Dictionary<String, Type> elemsToRemove;
         public List<String> elemsToUpdate;
 
         //keep the info of the graph reframe
@@ -141,7 +141,8 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 if (trackableScript != null)
                 {
                     //if it's modified, mark it as unsafe
-                    if ((trackableScript.modified == true) && (trackableScript.link != null)){
+                    if ((trackableScript.modified == true) && (trackableScript.link != null))
+                    {
                         UtilGraphSingleton.instance.elemsToUpdate.Add(trackableScript.link.UUID.ToString());
 
                         //get the corresponding edge
@@ -149,7 +150,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         ((ARFEdgeLink)edge).MarkUnsaved();
                     }
                 }
-                else if(worldAnchorScript != null)
+                else if (worldAnchorScript != null)
                 {
                     if ((worldAnchorScript.modified == true) && (worldAnchorScript.link != null))
                     {

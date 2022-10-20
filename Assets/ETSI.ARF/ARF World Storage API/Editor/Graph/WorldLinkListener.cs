@@ -22,7 +22,6 @@ using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 using ETSI.ARF.WorldStorage.UI;
 using Org.OpenAPITools.Model;
-using System;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;

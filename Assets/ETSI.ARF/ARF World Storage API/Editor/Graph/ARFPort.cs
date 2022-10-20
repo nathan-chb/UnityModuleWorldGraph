@@ -77,7 +77,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph
                     aRFedge.worldLink.UUIDTo = Guid.Parse(toNode.GUID);
                     aRFedge.worldLink.TypeTo = toNode.GetElemType();
                 }
-                
+
                 //update scene
                 String parentName = aRFedge.output.node.title;
                 String elemName = aRFedge.input.node.title;

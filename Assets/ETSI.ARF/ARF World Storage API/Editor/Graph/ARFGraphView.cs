@@ -36,7 +36,6 @@ using ETSI.ARF.WorldStorage.REST;
 using UnityEditor;
 using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows;
 using System.Linq;
-using Assets.ETSI.ARF.ARF_World_Storage_API.Scripts;
 
 namespace ETSI.ARF.WorldStorage.UI
 {
@@ -217,7 +216,7 @@ namespace ETSI.ARF.WorldStorage.UI
                                 name = name + " (" + (i + 1).ToString() + ")";
                                 break;
                             }
-                        }                 
+                        }
                     }
 
                     Trackable trackable = new Trackable(Guid.NewGuid(), name, Guid.Parse(worldStorageUser.UUID), Trackable.TrackableTypeEnum.OTHER, trackableEncodingInformation, new byte[64], localCRS, UnitSystem.CM, trackableSize, new Dictionary<string, List<string>>());
@@ -275,7 +274,7 @@ namespace ETSI.ARF.WorldStorage.UI
                     }
 
                     WorldAnchor anchor = new WorldAnchor(Guid.NewGuid(), name, Guid.Parse(worldStorageUser.UUID), localCRS, UnitSystem.CM, worldAnchorSize, new Dictionary<string, List<string>>());
-                    
+
                     selection.Clear();
                     var node = CreateAnchorNode(anchor, actualGraphPosition.x, actualGraphPosition.y);
                     node.MarkUnsaved();
@@ -639,7 +638,7 @@ namespace ETSI.ARF.WorldStorage.UI
                         String uuid = WorldAnchorRequest.AddWorldAnchor(worldStorageServer, worldAnchor);
 
                         //change the uuid in its edges, if there is a new edge to be added in the world storage it needs to have the correct uuid
-                        uuid = uuid.Replace("\"","");
+                        uuid = uuid.Replace("\"", "");
                         foreach (ARFEdgeLink edge in aRFNodeWorldAnchor.portIn.connections)
                         {
                             edge.worldLink.UUIDTo = Guid.Parse(uuid);
@@ -662,7 +661,7 @@ namespace ETSI.ARF.WorldStorage.UI
                     float yServer = UtilGraphSingleton.instance.nodePositions[node.GUID].y;
                     if (((xLocal != xServer) || (yLocal != yServer)) || UtilGraphSingleton.instance.elemsToUpdate.Contains(node.GUID))
                     {
-                        if(node is ARFNodeTrackable aRFNodeTrackable)
+                        if (node is ARFNodeTrackable aRFNodeTrackable)
                         {
                             var posX = new List<String>
                             {

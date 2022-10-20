@@ -18,10 +18,8 @@
 // Last change: June 2022
 //
 
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace ETSI.ARF.WorldStorage.UI
 {

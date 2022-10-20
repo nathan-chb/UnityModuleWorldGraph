@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace ETSI.ARF.WorldStorage.UI
 {
@@ -30,7 +28,7 @@ namespace ETSI.ARF.WorldStorage.UI
             {
                 Debug.Log("Rien à tracer");
             }
-        }
 #endif
+        }
     }
 }

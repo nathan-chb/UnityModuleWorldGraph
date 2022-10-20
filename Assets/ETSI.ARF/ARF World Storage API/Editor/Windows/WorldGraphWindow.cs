@@ -18,15 +18,11 @@
 // Last change: July 2022
 //
 
-using Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Graph;
 using ETSI.ARF.WorldStorage;
-using ETSI.ARF.WorldStorage.REST;
 using ETSI.ARF.WorldStorage.UI;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -65,7 +61,8 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
             //rootVisualElement.Add(GenerateToolbar());
             if (worldStorageServer != null)
             {
-                try { 
+                try
+                {
                     if (UtilGraphSingleton.instance.nodePositions == null)
                     {
                         UtilGraphSingleton.instance.InitNodePos(worldStorageServer, worldStorageUser);
@@ -124,7 +121,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                 }
                 GraphEditorWindow.ResetWindow();
 
-                if((myGraph != null))
+                if ((myGraph != null))
                 {
                     if (myGraph.ServerAndLocalDifferent() && EditorUtility.DisplayDialog("Saving node positions", "The World Graph has been modified. \nWould you like to push the modifications to the server ?", "Yes", "No"))
                     {
@@ -132,7 +129,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                     }
                     rootVisualElement.Remove(myGraph);
                 }
-                if(worldStorageServer != null)
+                if (worldStorageServer != null)
                 {
                     try
                     {
@@ -149,7 +146,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
                         Debug.Log(e.ToString());
                     }
                 }
-                else 
+                else
                 {
                     myGraph = null;
                 }
@@ -229,7 +226,7 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Editor.Windows
 
             if (graph.GetNodeByGuid(guid) is ARFNodeWorldAnchor anchorNode)
             {
-                anchorNode.worldAnchor.KeyvalueTags["ModelURL"] = new List<String>(){url};
+                anchorNode.worldAnchor.KeyvalueTags["ModelURL"] = new List<String>() { url };
 
                 if (UtilGraphSingleton.instance.nodePositions.ContainsKey(guid) && (!UtilGraphSingleton.instance.elemsToUpdate.Contains(guid)))
                 {

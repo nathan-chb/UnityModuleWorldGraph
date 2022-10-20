@@ -18,10 +18,7 @@
 // Last change: July 2022
 //
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 namespace ETSI.ARF.WorldStorage.UI.Prefabs
 {

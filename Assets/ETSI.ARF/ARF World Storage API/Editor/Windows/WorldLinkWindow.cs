@@ -21,7 +21,6 @@
 #define USING_OPENAPI_GENERATOR // alt. is Swagger
 #define isDEBUG
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -29,7 +28,6 @@ using TMPro;
 using ETSI.ARF.WorldStorage.REST;
 
 #if USING_OPENAPI_GENERATOR
-using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
 #else
 using IO.Swagger.Api;
@@ -62,7 +60,7 @@ namespace ETSI.ARF.WorldStorage.UI
         string UUID = System.Guid.Empty.ToString();
         string customName = "(no name for World Links)";
         string creatorUUID = System.Guid.Empty.ToString();
-        
+
         // From & To elements:
         private bool showListFrom = true;
         private bool showListTo = true;
@@ -260,7 +258,7 @@ namespace ETSI.ARF.WorldStorage.UI
             GUILayout.Label("UUID: " + UUID, EditorStyles.miniLabel); // readonly
             GUILayout.Label("Creator UID: " + creatorUUID, EditorStyles.miniLabel); // readonly
 #endif
-           
+
 
             EditorGUILayout.Space();
 
@@ -404,11 +402,11 @@ namespace ETSI.ARF.WorldStorage.UI
 
             TO.UUID = obj.UUIDTo.ToString();
             TO.type = obj.TypeTo;
-            
+
             unit = obj.Unit;
             if (obj.Transform.Count == 16)
             {
-                Matrix4x4 transf = WorldStorageWindow.MatrixFromLocalCRS(obj.Transform); 
+                Matrix4x4 transf = WorldStorageWindow.MatrixFromLocalCRS(obj.Transform);
                 transf_pos = transf.GetPosition();
                 transf_rot = transf.rotation.eulerAngles;
             }
@@ -422,7 +420,7 @@ namespace ETSI.ARF.WorldStorage.UI
             // Get here the params of the from/to elements (GET)
             GetElementFROM();
             GetElementTO();
-            
+
             this.Repaint();
         }
 

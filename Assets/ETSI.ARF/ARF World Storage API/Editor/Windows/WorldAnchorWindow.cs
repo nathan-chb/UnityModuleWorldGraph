@@ -21,7 +21,6 @@
 #define USING_OPENAPI_GENERATOR // alt. is Swagger
 #define isDEBUG
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -30,7 +29,6 @@ using ETSI.ARF.WorldStorage.REST;
 using System;
 
 #if USING_OPENAPI_GENERATOR
-using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
 #else
 using IO.Swagger.Api;

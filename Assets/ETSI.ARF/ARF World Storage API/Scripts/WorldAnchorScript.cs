@@ -6,7 +6,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -147,15 +146,6 @@ namespace Assets.ETSI.ARF.ARF_World_Storage_API.Scripts
             else
             {
                 return true;
-            }
-        }
-
-        void OnDrawGizmos()
-        {
-            if (link != null)
-            {
-                Gizmos.color = new Color(0.66f, 0.39f, 1, 0.77f);
-                Gizmos.DrawLine(transform.position, transform.parent.position);
             }
         }
 
